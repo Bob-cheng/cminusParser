@@ -51,7 +51,8 @@ extern int yydebug;
     MUL = 261,
     DIV = 262,
     ABS = 263,
-    EOL = 264
+    EOL = 264,
+    TEST = 265
   };
 #endif
 
@@ -64,7 +65,7 @@ union YYSTYPE
 
     int val;
 
-#line 68 "parser.tab.h" /* yacc.c:1909  */
+#line 69 "parser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

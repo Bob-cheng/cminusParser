@@ -16,7 +16,7 @@ ws              [ \t]+
 
 %%
 
-{ws}            {}
+{ws}            
 \n              {yycolumn = 1;}
 {integer}       {
     Node* np = getIntNode(atoi(yytext), yylineno); 
@@ -27,10 +27,7 @@ ws              [ \t]+
     Node* np = getFloatNode(atof(yytext), yylineno);
     yylval.node = np;
     return FLOAT;}
-{id}            {
-    Node* np = getStrNode(yytext, yylineno, "ID");
-    yylval.node = np;
-    return ID;}
+
 "/*"            {
     Node* np = getTermNode(yylineno, "LCOM");
     yylval.node = np;
@@ -55,7 +52,7 @@ ws              [ \t]+
     Node* np = getTermNode(yylineno, "ASSIGNOP");
     yylval.node = np;
     return ASSIGNOP;}
-">" | "<" | ">=" | "<=" | "==" | "!="         {
+">"|"<"|">="|"<="|"=="|"!="     {
     Node* np = getStrNode(yytext, yylineno, "RELOP");
     yylval.node = np;
     return RELOP;}
@@ -91,7 +88,7 @@ ws              [ \t]+
     Node* np = getTermNode(yylineno, "NOT");
     yylval.node = np;
     return NOT;}
-"int"|"float"   {
+"int"|"float"  {
     Node* np = getStrNode(yytext, yylineno, "TYPE");
     yylval.node = np;
     return TYPE;}
@@ -119,7 +116,7 @@ ws              [ \t]+
     Node* np = getTermNode(yylineno, "RC");
     yylval.node = np;
     return RC;}
-"struct"        {
+"struct"      {
     Node* np = getTermNode(yylineno, "STRUCT");
     yylval.node = np;
     return STRUCT;}
@@ -139,7 +136,30 @@ ws              [ \t]+
     Node* np = getTermNode(yylineno, "WHILE");
     yylval.node = np;
     return WHILE;}
+{id}            {
+    Node* np = getStrNode(yytext, yylineno, "ID");
+    yylval.node = np;
+    return ID;}
 .   {yyerrorA();}
 
-
 %%
+
+int main(int argc, char **argv)
+{
+    if(argc > 1) {
+        if(!(yyin = fopen(argv[1], "r"))) {
+            perror(argv[1]);
+            return (1);
+        }
+    }
+    yyparse();
+}
+
+void yyerror(char * s){
+    fprintf(stderr, "Error type B at Line %d:%d %s \n", yylineno,yylloc.first_column, s);
+}
+
+void yyerrorA()
+{
+ fprintf(stderr, "Error type A at Line %d:%d Mysterious character '%s'\n", yylineno, yylloc.first_column, yytext);
+}

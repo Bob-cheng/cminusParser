@@ -1,19 +1,18 @@
 /* simplest version of calculator */
 %{
 #include <stdio.h>
-#include "node.h"
 extern int yylineno;
 %}
 %locations
 %union {
-    Node* node;
+    struct Node * node;
 }
 /* declare tokens */
-%token<node> INT FLOAT ID LCOM RCOM COMMENT 
-%token<node> SEMI COMMA ASSIGNOP RELOP
-%token<node> PLUS MINUS STAR DIV OR AND DOT NOT TYPE
-%token<node> LP RP LB RB LC RC 
-%token<node> STRUCT RETURN IF ELSE WHILE
+%token<node> INT FLOAT ID LCOM RCOM COMMENT  //6
+%token<node> SEMI COMMA ASSIGNOP RELOP  //4
+%token<node> PLUS MINUS STAR DIV OR AND DOT NOT TYPE // 9
+%token<node> LP RP LB RB LC RC   // 6
+%token<node> STRUCT RETURN IF ELSE WHILE //5
 
 %right ASSIGNOP
 %left OR 
@@ -53,6 +52,7 @@ Tag: ID
 
 VarDec: ID
 | VarDec LB INT RB
+| error RB
 ;
 FunDec: ID LP VarList RP
 | ID LP RP
@@ -108,31 +108,8 @@ Exp: Exp ASSIGNOP Exp
 | ID
 | INT
 | FLOAT
-| error RP
 ;
 Args: Exp COMMA Args
 | Exp
 ;
 %%
-
-int main(int argc, char **argv)
-{
-    if(argc > 1) {
-        FILE * yyin;
-        if(!(yyin = fopen(argv[1], "r"))) {
-            perror(argv[1]);
-            return (1);
-        }
-        yyrestrat(yyin);
-    }
-    yyparse();
-}
-
-void yyerror(char * s){
-    fprintf(stderr, "Error type B at Line %d:%d %s \n", yylineno,yylloc.first_column, s);
-}
-
-void yyerrorA()
-{
- fprintf(stderr, "Error type A at Line %d:%d Mysterious character '%s'\n", yylineno, yylloc.first_column, yytext);
-}

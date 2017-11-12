@@ -13,6 +13,8 @@ yycolumn += yyleng;
 "*" { return MUL; }
 "/" { return DIV; }
 "|" { return ABS; }
+"abc" {return TEST;}
+
 [0-9]+ { yylval.val = atoi(yytext); return NUMBER; }
 "\\" {return EOL;}
 [ \t] { /* ignore whitespace */ }
