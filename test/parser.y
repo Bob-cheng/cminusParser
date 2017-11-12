@@ -9,7 +9,7 @@ extern int yylineno;
 /* declare tokens */
 %token<val> NUMBER
 %token<val> ADD SUB MUL DIV ABS
-%token EOL
+%token EOL TEST
 %type <val> exp factor term
  
 
