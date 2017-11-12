@@ -1,15 +1,15 @@
 %{
-# include "parser.tab.h"
 # include "node.h"
+# include "parser.tab.h"
 int yycolumn = 1;
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
 yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
 yycolumn += yyleng;
-
+int iserror = 0;
 %}
 %option yylineno
 
-integer         [0-9]+
+integer         ([1-9][0-9]*)|(0[0-7]*)|(0x[0-9A-F]*)
 float           [0-9]+\.[0-9]*
 id              [a-zA-Z_][a-zA-Z0-9_]*
 ws              [ \t]+
@@ -19,12 +19,12 @@ ws              [ \t]+
 {ws}            
 \n              {yycolumn = 1;}
 {integer}       {
-    Node* np = getIntNode(atoi(yytext), yylineno); 
+    Node* np = getStrNode(yytext, yylineno, "INT", yyleng);
     yylval.node = np; 
     return INT;
     }
 {float}         {
-    Node* np = getFloatNode(atof(yytext), yylineno);
+    Node* np = getStrNode(yytext, yylineno, "FLOAT", yyleng);
     yylval.node = np;
     return FLOAT;}
 
@@ -53,7 +53,7 @@ ws              [ \t]+
     yylval.node = np;
     return ASSIGNOP;}
 ">"|"<"|">="|"<="|"=="|"!="     {
-    Node* np = getStrNode(yytext, yylineno, "RELOP");
+    Node* np = getStrNode(yytext, yylineno, "RELOP", yyleng);
     yylval.node = np;
     return RELOP;}
 "+"             {
@@ -89,7 +89,7 @@ ws              [ \t]+
     yylval.node = np;
     return NOT;}
 "int"|"float"  {
-    Node* np = getStrNode(yytext, yylineno, "TYPE");
+    Node* np = getStrNode(yytext, yylineno, "TYPE", yyleng);
     yylval.node = np;
     return TYPE;}
 "("             {
@@ -137,7 +137,7 @@ ws              [ \t]+
     yylval.node = np;
     return WHILE;}
 {id}            {
-    Node* np = getStrNode(yytext, yylineno, "ID");
+    Node* np = getStrNode(yytext, yylineno, "ID", yyleng);
     yylval.node = np;
     return ID;}
 .   {yyerrorA();}
@@ -156,10 +156,17 @@ int main(int argc, char **argv)
 }
 
 void yyerror(char * s){
+    iserror = 1;
     fprintf(stderr, "Error type B at Line %d:%d %s \n", yylineno,yylloc.first_column, s);
 }
 
 void yyerrorA()
 {
- fprintf(stderr, "Error type A at Line %d:%d Mysterious character '%s'\n", yylineno, yylloc.first_column, yytext);
+    iserror = 1;
+    fprintf(stderr, "Error type A at Line %d:%d Mysterious character '%s'\n", yylineno, yylloc.first_column, yytext);
+}
+
+void yyerrorB(char* info){
+    iserror = 1;
+    //fprintf(stderr, "Error type B at Line %d:%d %s \n", yylineno,yylloc.first_column, info);
 }
