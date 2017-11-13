@@ -552,8 +552,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "Cminus.l"
-#line 2 "Cminus.l"
+#line 1 "cminus.l"
+#line 2 "cminus.l"
 # include "funcs.h"
 # include "parser.h"
 int yycolumn = 1;
@@ -779,7 +779,7 @@ YY_DECL
 		}
 
 	{
-#line 17 "Cminus.l"
+#line 17 "cminus.l"
 
 
 #line 786 "cminus.lex.c"
@@ -851,30 +851,30 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 19 "Cminus.l"
+#line 19 "cminus.l"
 
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 20 "Cminus.l"
+#line 20 "cminus.l"
 
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 21 "Cminus.l"
+#line 21 "cminus.l"
 {yycolumn = 1;}  
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 22 "Cminus.l"
+#line 22 "cminus.l"
 {yycolumn = 1;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 23 "Cminus.l"
+#line 23 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "INT", yyleng);
     yylval.node = np; 
@@ -883,7 +883,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 28 "Cminus.l"
+#line 28 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "FLOAT", yyleng);
     yylval.node = np;
@@ -891,7 +891,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 32 "Cminus.l"
+#line 32 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "SEMI");
     yylval.node = np;
@@ -899,7 +899,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "Cminus.l"
+#line 36 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "COMMA");
     yylval.node = np;
@@ -907,7 +907,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 40 "Cminus.l"
+#line 40 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "ASSIGNOP");
     yylval.node = np;
@@ -915,7 +915,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 44 "Cminus.l"
+#line 44 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "RELOP", yyleng);
     yylval.node = np;
@@ -923,7 +923,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 48 "Cminus.l"
+#line 48 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "PLUS");
     yylval.node = np;
@@ -931,7 +931,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 52 "Cminus.l"
+#line 52 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "MINUS");
     yylval.node = np;
@@ -939,7 +939,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 56 "Cminus.l"
+#line 56 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "STAR");
     yylval.node = np;
@@ -947,7 +947,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 60 "Cminus.l"
+#line 60 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "DIV");
     yylval.node = np;
@@ -955,7 +955,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 64 "Cminus.l"
+#line 64 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "OR");
     yylval.node = np;
@@ -963,7 +963,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 68 "Cminus.l"
+#line 68 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "AND");
     yylval.node = np;
@@ -971,7 +971,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 72 "Cminus.l"
+#line 72 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "DOT");
     yylval.node = np;
@@ -979,7 +979,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 76 "Cminus.l"
+#line 76 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "NOT");
     yylval.node = np;
@@ -987,7 +987,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 80 "Cminus.l"
+#line 80 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "TYPE", yyleng);
     yylval.node = np;
@@ -995,7 +995,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 84 "Cminus.l"
+#line 84 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "LP");
     yylval.node = np;
@@ -1003,7 +1003,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 88 "Cminus.l"
+#line 88 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "RP");
     yylval.node = np;
@@ -1011,7 +1011,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 92 "Cminus.l"
+#line 92 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "LB");
     yylval.node = np;
@@ -1019,7 +1019,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 96 "Cminus.l"
+#line 96 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "RB");
     yylval.node = np;
@@ -1027,7 +1027,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 100 "Cminus.l"
+#line 100 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "LC");
     yylval.node = np;
@@ -1035,7 +1035,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 104 "Cminus.l"
+#line 104 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "RC");
     yylval.node = np;
@@ -1043,7 +1043,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 108 "Cminus.l"
+#line 108 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "STRUCT");
     yylval.node = np;
@@ -1051,7 +1051,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 112 "Cminus.l"
+#line 112 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "RETURN");
     yylval.node = np;
@@ -1059,7 +1059,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 116 "Cminus.l"
+#line 116 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "IF");
     yylval.node = np;
@@ -1067,7 +1067,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 120 "Cminus.l"
+#line 120 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "ELSE");
     yylval.node = np;
@@ -1075,7 +1075,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 124 "Cminus.l"
+#line 124 "cminus.l"
 {
     Node* np = getTermNode(yylineno, "WHILE");
     yylval.node = np;
@@ -1083,7 +1083,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 128 "Cminus.l"
+#line 128 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "ID", yyleng);
     yylval.node = np;
@@ -1091,12 +1091,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 132 "Cminus.l"
+#line 132 "cminus.l"
 {yyerrorA();}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 134 "Cminus.l"
+#line 134 "cminus.l"
 ECHO;
 	YY_BREAK
 #line 1103 "cminus.lex.c"
@@ -2112,7 +2112,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 134 "Cminus.l"
+#line 134 "cminus.l"
 
 
 
