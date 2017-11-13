@@ -1,7 +1,6 @@
 /* simplest version of calculator */
 %{
-# include "node.h"
-# include "funcs.c"
+# include "funcs.h"
 extern int yylineno;
 extern int iserror;
 

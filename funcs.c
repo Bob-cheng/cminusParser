@@ -1,23 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "node.h"
+#include <math.h>
+#include "funcs.h"
 
-Node* getTermNode(int lineno, char* tkName){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 0;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = lineno;
-    Nptr->chCount = 0;
-    return Nptr;
-}
+
 
 int power(int a, int b){
-    // if(b == 1){
-    //     return a;
-    // }else{
-    //     return pow(a, b-1) * a;
-    // }
     int out = 1;
     for (size_t i = 0; i < b; i++)
     {
@@ -25,6 +14,8 @@ int power(int a, int b){
     }
     return out;
 }
+
+
 
 int HToD(char * str, int leng){
     str += 2;
@@ -53,6 +44,25 @@ int OToD(char * str, int leng){
     return out;
 }
 
+float strTof(char * str, int leng){
+    int indexE = strchr(str, 'e') - str;
+    str[indexE] = '\0';
+    float after = atof(str+indexE+1);
+    float before = atof(str);
+    float out = before * powf(10, after);
+    return out;
+}
+
+
+Node* getTermNode(int lineno, char* tkName){
+    Node* Nptr = (Node*) malloc(sizeof(Node));
+    Nptr->nodeType = 0;
+    Nptr->tkName = tkName;
+    Nptr->lineNo = lineno;
+    Nptr->chCount = 0;
+    return Nptr;
+}
+
 //创建ID TYPE  FLOAT 3个类型的节点
 Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     char* str = (char*) malloc((yyleng+10) * sizeof(char));
@@ -64,7 +74,11 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     Nptr->lineNo = lineno;
     Nptr->chCount = 0;
     if(!strcmp(tkName, "FLOAT")){
-        Nptr->fval = atof(str);
+        if(strchr(str, 'e') != NULL){
+            Nptr->fval=strTof(str, yyleng);
+        }else{
+            Nptr->fval = atof(str);
+        }
     }else if (!strcmp(tkName, "INT")){
         if(str[0] == '0' && str[1] == 'x'){
             Nptr-> ival = HToD(str, yyleng);
