@@ -1,6 +1,6 @@
 %{
-# include "node.h"
-# include "parser.tab.h"
+# include "funcs.h"
+# include "parser.h"
 int yycolumn = 1;
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
 yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
@@ -10,13 +10,15 @@ int iserror = 0;
 %option yylineno
 
 integer         ([1-9][0-9]*)|(0[0-7]*)|(0x[0-9A-F]*)
-float           [0-9]+\.[0-9]*
+float           ([0-9]+\.[0-9]*)|([0-9]+\.[0-9]*e-?[1-9][0-9]*)
 id              [a-zA-Z_][a-zA-Z0-9_]*
 ws              [ \t]+
 
 %%
 
-{ws}            
+{ws}
+"/*"[^*]*\*+([^/*][^*]*\*+)*"/"     
+"//".*\n        {yycolumn = 1;}  
 \n              {yycolumn = 1;}
 {integer}       {
     Node* np = getStrNode(yytext, yylineno, "INT", yyleng);
@@ -27,19 +29,6 @@ ws              [ \t]+
     Node* np = getStrNode(yytext, yylineno, "FLOAT", yyleng);
     yylval.node = np;
     return FLOAT;}
-
-"/*"            {
-    Node* np = getTermNode(yylineno, "LCOM");
-    yylval.node = np;
-    return LCOM;}
-"*/"            {
-    Node* np = getTermNode(yylineno, "RCOM");
-    yylval.node = np;
-    return RCOM;}
-"//"            {
-    Node* np = getTermNode(yylineno, "COMMENT");
-    yylval.node = np;
-    return COMMENT;}
 ";"             {
     Node* np = getTermNode(yylineno, "SEMI");
     yylval.node = np;

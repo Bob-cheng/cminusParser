@@ -15,9 +15,6 @@ typedef struct Node
 } Node;
 
 Node* getTermNode(int lineno, char* tkName);
-int power(int a, int b);
-int HToD(char * str, int leng);
-int OToD(char * str, int leng);
 Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng);
 Node* getIntNode(int yyint, int lineno);
 Node* own0Child(char* tkName);
