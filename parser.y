@@ -20,13 +20,15 @@ extern int iserror;
 %type<node> StructSpecifier OptTag Tag VarDec FunDec VarList ParamDec
 %type<node> CompSt StmtList Stmt DefList Dec Exp Args Def DecList
 
+%nonassoc	AFTER_ELSE
+%nonassoc	ELSE
 %right ASSIGNOP
 %left OR 
 %left AND
 %left RELOP
 %left PLUS MINUS
 %left STAR DIV 
-%right NOT
+%right NOT RMINUS
 %left LP RP LB RB DOT 
 
 %start Program
@@ -82,7 +84,7 @@ StmtList:               {$$ = own0Child("StmtList");}
 Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
 | CompSt                {$$ = own1Child("Stmt", $1);}
 | RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);}
-| IF LP Exp RP Stmt     {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}
+| IF LP Exp RP Stmt    %prec AFTER_ELSE {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
 | IF LP Exp RP Stmt ELSE Stmt {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);}
 | WHILE LP Exp RP Stmt  {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}
 | error SEMI            {$$ = own0Child("Stmt"); yyerrorB("Missing2 \";\"");}
@@ -110,7 +112,7 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);}
 | Exp STAR Exp   {$$ = own3Child("Exp", $1, $2, $3);}
 | Exp DIV Exp    {$$ = own3Child("Exp", $1, $2, $3);}
 | LP Exp RP      {$$ = own3Child("Exp", $1, $2, $3);}
-| MINUS Exp      {$$ = own2Child("Exp", $1, $2);}
+| MINUS Exp    %prec RMINUS  {$$ = own2Child("Exp", $1, $2);}
 | NOT Exp        {$$ = own2Child("Exp", $1, $2);}
 | ID LP Args RP  {$$ = own4Child("Exp", $1, $2, $3, $4);}
 | ID LP RP       {$$ = own3Child("Exp", $1, $2, $3);}

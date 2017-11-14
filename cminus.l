@@ -9,8 +9,8 @@ int iserror = 0;
 %}
 %option yylineno
 
-integer         ([1-9][0-9]*)|(0[0-7]*)|(0x[0-9A-F]*)
-float           ([0-9]+\.[0-9]*)|([0-9]+\.[0-9]*e-?[1-9][0-9]*)
+integer         -?([1-9][0-9]*)|-?(0[0-7]*)|(0x[0-9A-F]*)
+float           -?([0-9]+\.[0-9]*)|-?([0-9]+\.[0-9]*e-?[1-9][0-9]*)
 id              [a-zA-Z_][a-zA-Z0-9_]*
 ws              [ \t]+
 
@@ -155,7 +155,8 @@ void yyerrorA()
     fprintf(stderr, "Error type A at Line %d:%d Mysterious character '%s'\n", yylineno, yylloc.first_column, yytext);
 }
 
-void yyerrorB(char* info){
+void yyerrorB(char* info) //test
+{
     iserror = 1;
     //fprintf(stderr, "Error type B at Line %d:%d %s \n", yylineno,yylloc.first_column, info);
 }

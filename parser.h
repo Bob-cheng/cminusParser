@@ -74,7 +74,9 @@ extern int yydebug;
     RETURN = 284,
     IF = 285,
     ELSE = 286,
-    WHILE = 287
+    WHILE = 287,
+    AFTER_ELSE = 288,
+    RMINUS = 289
   };
 #endif
 
@@ -87,7 +89,7 @@ union YYSTYPE
 
     Node * node;
 
-#line 91 "parser.h" /* yacc.c:1909  */
+#line 93 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

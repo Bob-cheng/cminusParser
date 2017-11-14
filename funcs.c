@@ -92,16 +92,16 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     }
     return Nptr;
 }
-//INT
-Node* getIntNode(int yyint, int lineno){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 0;
-    Nptr->tkName = "INT";
-    Nptr->lineNo = lineno;
-    Nptr->chCount = 0;
-    Nptr->ival = yyint;
-    return Nptr;
-}
+// //INT
+// Node* getIntNode(int yyint, int lineno){
+//     Node* Nptr = (Node*) malloc(sizeof(Node));
+//     Nptr->nodeType = 0;
+//     Nptr->tkName = "INT";
+//     Nptr->lineNo = lineno;
+//     Nptr->chCount = 0;
+//     Nptr->ival = yyint;
+//     return Nptr;
+// }
 
 
 Node* own0Child(char* tkName){
