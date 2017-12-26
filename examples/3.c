@@ -1,16 +1,17 @@
 struct MyStruct
 {
     int a;
-};
-int inc(int a, int b) 
+    float b;
+} ab;
+int inc(int a, int b, float c) 
 {
 int i=0,j=2,k[10][1];
+float kk[12];
 i = i + 1;
 return i;
 }
-
-int main(){
+int mymain(float aa, struct MyStruct b){
     int a;
-    a = inc(1,3);
+    a = inc(1,3,4);
     return a;
 }

@@ -4,6 +4,12 @@
 #include <math.h>
 # include<stdarg.h>
 #include "funcs.h"
+
+void addToParmList(VarRec* node){
+    node->next = PARMList;
+    PARMList = node;
+}
+
 //增加变量记录
 void addVarRec(Node* ID){
     if(ID == NULL){
@@ -38,6 +44,7 @@ VarRec* checkVarRec(Node* ID){
                 p=p->next;
             }
         }
+        return NULL;
     }
 }
 
@@ -54,40 +61,6 @@ void addFuncRec(Node* ID){
 }
 
 
-
-Node* setType(Node* in, int type){
-    if(in == NULL){
-        Node* out = (Node*)malloc(sizeof(Node));
-        out->type = type;
-        return out;
-    }else{
-        in->type = type;
-        return in;
-    }
-}
-
-Node* setRtType(Node* in, int type){
-    if(in == NULL){
-        Node* out = (Node*)malloc(sizeof(Node));
-        out->funcRtType = type;
-        return out;
-    }else{
-        in->funcRtType = type;
-        return in;
-    }
-}
-
-
-Node* combineType(Node* carryType, Node* src){
-    //假设前面的那个设置有type
-    if(carryType == NULL){
-        return src;
-    }else{
-        src->type = carryType->type;
-        free(carryType);
-        return src;
-    }
-}
 
 
 
@@ -273,7 +246,20 @@ void showTree(Node* root, int level){
         if(! strcmp(root->tkName, "TYPE")){
             printf("TYPE:%s\n", root->sval);
         }else if (! strcmp(root->tkName, "ID")){
-            printf("ID:%s\n", root->sval);
+            if(root->type==4){
+                printf("ID:%s(%d)rt(%d)pmcnt(%d)", root->sval, root->type, root->subType, root->parmCnt);
+                VarRec* p = root->parmList;
+                while (p)
+                {
+                    printf("[%s:%d]", p->name, p->type);
+                    p=p->next;
+                }
+                printf("\n");
+            }else if(root->type==5){
+                printf("ID:%s(%d)artp(%d)\n", root->sval, root->type, root->subType);
+            }else{
+                printf("ID:%s(%d)\n", root->sval, root->type);
+            }
         }else if (! strcmp(root->tkName, "INT")){
             printf("INT:%d\n", root->ival);
         }else if (! strcmp(root->tkName, "FLOAT")){

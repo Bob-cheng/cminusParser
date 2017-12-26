@@ -2136,6 +2136,22 @@ void yyfree (void * ptr )
 
 int main(int argc, char **argv)
 {
+    var_head = (VarRec*)malloc(sizeof(VarRec));
+    var_tail = var_head;
+    var_head->next=NULL;
+
+    func_head = (FuncRec*)malloc(sizeof(FuncRec));
+    func_tail = func_head;
+    func_head->next=NULL;
+
+    arr_head = (ArrRec*)malloc(sizeof(ArrRec));
+    arr_tail = arr_head;
+    arr_head->next=NULL;
+
+    st_head = (StRec*)malloc(sizeof(StRec));
+    st_tail = st_head;
+    st_head->next=NULL;
+
     if(argc > 1) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);
