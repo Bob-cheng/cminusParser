@@ -77,10 +77,17 @@ ws              [ \t]+
     Node* np = getTermNode(yylineno, "NOT");
     yylval.node = np;
     return NOT;}
-"int"|"float"  {
+"int"           {
     Node* np = getStrNode(yytext, yylineno, "TYPE", yyleng);
+    np->type = 1; //提前确定类型，int
     yylval.node = np;
     return TYPE;}
+"float"         {
+    Node* np = getStrNode(yytext, yylineno, "TYPE", yyleng);
+    np->type = 2; //提前确定类型，float
+    yylval.node = np;
+    return TYPE;}
+
 "("             {
     Node* np = getTermNode(yylineno, "LP");
     yylval.node = np;
@@ -135,6 +142,22 @@ ws              [ \t]+
 
 int main(int argc, char **argv)
 {
+    var_head = (VarRec*)malloc(sizeof(VarRec));
+    var_tail = var_head;
+    var_head->next=NULL;
+
+    func_head = (FuncRec*)malloc(sizeof(FuncRec));
+    func_tail = func_head;
+    func_head->next=NULL;
+
+    arr_head = (ArrRec*)malloc(sizeof(ArrRec));
+    arr_tail = arr_head;
+    arr_head->next=NULL;
+
+    st_head = (StRec*)malloc(sizeof(StRec));
+    st_tail = st_head;
+    st_head->next=NULL;
+
     if(argc > 1) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);

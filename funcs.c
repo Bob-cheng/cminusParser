@@ -2,7 +2,92 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+# include<stdarg.h>
 #include "funcs.h"
+//增加变量记录
+void addVarRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return;
+    }else{
+        VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
+        newNode->name = ID->sval;
+        newNode->type = ID->type;
+        newNode->next = NULL;
+        var_tail->next = newNode;
+        var_tail = var_tail->next;
+        return;
+    }
+}
+//查找变量记录 0表示没找到 1表示找到了
+VarRec* checkVarRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return NULL;
+    }else{
+        VarRec* p = var_head;
+        if(p->next==NULL){
+            return NULL;
+        }
+        p=p->next;
+        while (p->next!=NULL)
+        {
+            if(!strcmp(p->name, ID->sval)){
+                return p;
+            }else{
+                p=p->next;
+            }
+        }
+    }
+}
+
+//建立函数符号表
+void addFuncRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return;
+    }else{
+        FuncRec* newNode = (FuncRec*)malloc(sizeof(FuncRec));
+        
+        return;
+    }
+}
+
+
+
+Node* setType(Node* in, int type){
+    if(in == NULL){
+        Node* out = (Node*)malloc(sizeof(Node));
+        out->type = type;
+        return out;
+    }else{
+        in->type = type;
+        return in;
+    }
+}
+
+Node* setRtType(Node* in, int type){
+    if(in == NULL){
+        Node* out = (Node*)malloc(sizeof(Node));
+        out->funcRtType = type;
+        return out;
+    }else{
+        in->funcRtType = type;
+        return in;
+    }
+}
+
+
+Node* combineType(Node* carryType, Node* src){
+    //假设前面的那个设置有type
+    if(carryType == NULL){
+        return src;
+    }else{
+        src->type = carryType->type;
+        free(carryType);
+        return src;
+    }
+}
 
 
 
@@ -74,12 +159,14 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     Nptr->lineNo = lineno;
     Nptr->chCount = 0;
     if(!strcmp(tkName, "FLOAT")){
+        //Nptr->type = "float";
         if(strchr(str, 'e') != NULL){
             Nptr->fval=strTof(str, yyleng);
         }else{
             Nptr->fval = atof(str);
         }
     }else if (!strcmp(tkName, "INT")){
+        //Nptr->type = "float";
         if(str[0] == '0' && str[1] == 'x'){
             Nptr-> ival = HToD(str, yyleng);
         }else if(str[0] == '0'){
@@ -103,83 +190,13 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
 //     return Nptr;
 // }
 
-
-Node* own0Child(char* tkName){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 1;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = -1;
-    Nptr->chCount = 0;
-    return Nptr;
-}
-
-Node* own1Child(char* tkName, Node* ch0){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 1;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = ch0->lineNo;
-    Nptr->chCount = 1;
-    Nptr->children[0] = ch0;
-    return Nptr;
-}
-
-Node* own2Child(char* tkName, Node* ch0, Node* ch1){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 1;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = ch0->lineNo;
-    Nptr->chCount = 2;
-    Nptr->children[0] = ch0;
-    Nptr->children[1] = ch1;
-    return Nptr;
-}
-
-Node* own3Child(char* tkName, Node* ch0, Node* ch1, Node* ch2){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 1;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = ch0->lineNo;
-    Nptr->chCount = 3;
-    Nptr->children[0] = ch0;
-    Nptr->children[1] = ch1;
-    Nptr->children[2] = ch2;
-    return Nptr;
-}
-
-Node* own4Child(char* tkName, Node* ch0, Node* ch1, Node* ch2,Node* ch3){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 1;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = ch0->lineNo;
-    Nptr->chCount = 4;
-    Nptr->children[0] = ch0;
-    Nptr->children[1] = ch1;
-    Nptr->children[2] = ch2;
-    Nptr->children[3] = ch3;
-    return Nptr;
-}
-
-Node* own5Child(char* tkName, Node* ch0, Node* ch1, Node* ch2,Node* ch3, Node* ch4){
-    Node* Nptr = (Node*) malloc(sizeof(Node));
-    Nptr->nodeType = 1;
-    Nptr->tkName = tkName;
-    Nptr->lineNo = ch0->lineNo;
-    Nptr->chCount = 5;
-    Nptr->children[0] = ch0;
-    Nptr->children[1] = ch1;
-    Nptr->children[2] = ch2;
-    Nptr->children[3] = ch3;
-    Nptr->children[4] = ch4;
-    return Nptr;
-}
-
-Node* own7Child(char* tkName, Node* ch0, Node* ch1, 
+Node* ownManyChild(char* tkName, int count, Node* ch0, Node* ch1, 
                     Node* ch2,Node* ch3, Node* ch4, Node* ch5, Node* ch6){
     Node* Nptr = (Node*) malloc(sizeof(Node));
     Nptr->nodeType = 1;
     Nptr->tkName = tkName;
-    Nptr->lineNo = ch0->lineNo;
-    Nptr->chCount = 7;
+    Nptr->lineNo = count==0?-1:ch0->lineNo;
+    Nptr->chCount = count;
     Nptr->children[0] = ch0;
     Nptr->children[1] = ch1;
     Nptr->children[2] = ch2;
@@ -189,6 +206,56 @@ Node* own7Child(char* tkName, Node* ch0, Node* ch1,
     Nptr->children[6] = ch6;
     return Nptr;
 }
+
+Node* own0Child(char* tkName){
+    Node* Nptr = ownManyChild(tkName, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                    
+    return Nptr;
+}
+
+Node* own1Child(char* tkName, Node* ch0){
+    
+    Node* Nptr = ownManyChild(tkName, 1, ch0, NULL, NULL, NULL, NULL, NULL, NULL);
+                    
+    return Nptr;
+}
+
+Node* own2Child(char* tkName, Node* ch0, Node* ch1){
+    
+    Node* Nptr = ownManyChild(tkName, 2, ch0, ch1, NULL, NULL, NULL, NULL, NULL);
+                    
+    return Nptr;
+}
+
+Node* own3Child(char* tkName, Node* ch0, Node* ch1, Node* ch2){
+    
+    Node* Nptr = ownManyChild(tkName, 3, ch0, ch1, ch2, NULL, NULL, NULL, NULL);
+                    
+    return Nptr;
+}
+
+Node* own4Child(char* tkName, Node* ch0, Node* ch1, Node* ch2,Node* ch3){
+    
+    Node* Nptr = ownManyChild(tkName, 4, ch0, ch1, ch2,ch3, NULL, NULL, NULL);
+                    
+    return Nptr;
+}
+
+Node* own5Child(char* tkName, Node* ch0, Node* ch1, Node* ch2,Node* ch3, Node* ch4){
+    
+    Node* Nptr = ownManyChild(tkName, 5, ch0, ch1, ch2,ch3, ch4, NULL, NULL);
+                    
+    return Nptr;
+}
+
+Node* own7Child(char* tkName, Node* ch0, Node* ch1, 
+                    Node* ch2,Node* ch3, Node* ch4, Node* ch5, Node* ch6){
+    Node* Nptr = ownManyChild(tkName, 7, ch0, ch1, ch2,ch3, ch4, ch5, ch6);
+                    
+    return Nptr;
+}
+
+
 
 void showTree(Node* root, int level){
     if(root->nodeType == 1 && root->chCount != 0){
