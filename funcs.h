@@ -1,7 +1,6 @@
 #ifndef HEAD
 #define  HEAD
-int IDType;
-int PARMCnt;
+int IDType; //记录当前的ID类型的全局变量
 
 
 typedef struct VarRec
@@ -11,8 +10,9 @@ typedef struct VarRec
     struct VarRec* next;
 } VarRec;
 VarRec* var_head, *var_tail;
-
-VarRec* PARMList;
+VarRec* PARMList;//记录函数参数类型和名字的链表
+VarRec* STDefList;//结构体定义的时候的参数列表
+VarRec* STDclList;//结构体声明的时候的参数列表
 
 typedef struct Node
 {
@@ -25,23 +25,21 @@ typedef struct Node
     float fval; //浮点数属性的值
     int chCount; //孩子节点的个数
     struct Node* children[10]; //指向孩子的指针
-    int subType; //如果是数组或函数的ID，记录数组类型或函数返回类型 1->int 2->float 3->struct
-    int parmCnt;//如果是函数，记录函数的参数个数
-    VarRec* parmList;//如果是函数，记录函数的参数列表
+    int subType; //如果是[数组或函数]的ID，记录数组类型或函数返回类型 1->int 2->float 3->struct, [-1]表示是一个右值
+    int parmCnt;//如果是[函数]，记录函数的参数个数
+    int arrDim;//如果是[数组]，记录数组的维度
+    VarRec* parmList;//如果是[函数]，记录函数的参数列表
+    VarRec* stdefList;//如果是[结构体]，记录结构体的参数列表
     //char* type;// 常数的类型 tkName=='FLOAT'或'INT'有效，例如 1->int  1.0->float 
 
 } Node;
-
-
-
-
 
 typedef struct FuncRec
 {
     char* name;
     int rtype;//返回值类型 0->not know 1->int 2->float 3->struct
     int para_count;//形参个数,这里暂且限制为10个及以下
-    int para_types[10];//按顺序储存形参的类型
+    VarRec* def_list; //形参列表
     struct FuncRec* next;
 } FuncRec;
 FuncRec* func_head, *func_tail;
@@ -78,15 +76,22 @@ Node* own5Child(char* tkName, Node* ch0, Node* ch1, Node* ch2,Node* ch3, Node* c
 Node* own7Child(char* tkName, Node* ch0, Node* ch1, 
                     Node* ch2,Node* ch3, Node* ch4, Node* ch5, Node* ch6);
 void showTree(Node* root, int level);
-void addVarRec(Node* ID);
+int addVarRec(Node* ID);
 VarRec* checkVarRec(Node* ID);
-void addFuncRec(Node* ID);
-Node* setRtType(Node* in, int type);
+int addFuncRec(Node* ID);
+FuncRec* checkFuncRec(Node* ID);
+void addArrRec(Node* ID);
+ArrRec* checkArrRec(Node* ID);
+void addStRec(Node* ID);
+StRec* checkStRec(Node* ID);
+void debug();
+//Node* setRtType(Node* in, int type);
 void addToParmList(VarRec* node);
-
+void addToSTDefList(VarRec* node);
+void outPutLinks(VarRec* link);
 void yyerror(char * s);
 void yyerrorA();
-void yyerrorB(char* info);
+void myerror(int type, char * s);
 int yylex ();
 //用于创建{}（）+—等符号对应的节
 #endif // !HEAD

@@ -10,11 +10,33 @@ void addToParmList(VarRec* node){
     PARMList = node;
 }
 
-//增加变量记录
-void addVarRec(Node* ID){
+void addToSTDefList(VarRec* node){
+    node->next = STDefList;
+    STDefList = node;
+}
+
+void outPutLinks(VarRec* link){
+    printf("\n---link-start\n");
+    while (link)
+    {
+        printf("[%d, %s]", link->type, link->name);
+        link = link->next;
+    }
+    printf("\n---link-end\n");
+}
+
+void debug(){
+    printf("\n--------debug---------\n");
+}
+
+//增加变量记录 0->失败 1->成功
+int addVarRec(Node* ID){
     if(ID == NULL){
         printf("error get info from ID");
-        return;
+        return 0;
+    }else if(checkVarRec(ID) != NULL){
+        //已经存在。
+        return 0;
     }else{
         VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
         newNode->name = ID->sval;
@@ -22,7 +44,7 @@ void addVarRec(Node* ID){
         newNode->next = NULL;
         var_tail->next = newNode;
         var_tail = var_tail->next;
-        return;
+        return 1;
     }
 }
 //查找变量记录 0表示没找到 1表示找到了
@@ -36,7 +58,7 @@ VarRec* checkVarRec(Node* ID){
             return NULL;
         }
         p=p->next;
-        while (p->next!=NULL)
+        while (p!=NULL)
         {
             if(!strcmp(p->name, ID->sval)){
                 return p;
@@ -49,20 +71,125 @@ VarRec* checkVarRec(Node* ID){
 }
 
 //建立函数符号表
-void addFuncRec(Node* ID){
+int addFuncRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return 0;
+    }else if(checkFuncRec(ID) != NULL){
+        return 0;
+    }else{
+        FuncRec* newNode = (FuncRec*)malloc(sizeof(FuncRec));
+        newNode->name = ID->sval;
+        newNode->next = NULL;
+        newNode->rtype = ID->subType;
+        newNode->def_list = ID->parmList;
+        newNode->para_count = ID->parmCnt;
+        func_tail->next = newNode;
+        func_tail = func_tail->next;
+        return 1;
+    }
+}
+//查找函数记录，找不到返回NULL，找到了就返回指针
+FuncRec* checkFuncRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return NULL;
+    }else{
+        FuncRec* p = func_head;
+        if(p->next==NULL){
+            return NULL;
+        }
+        p=p->next;
+        while (p!=NULL)
+        {
+            if(!strcmp(p->name, ID->sval)){
+                return p;
+            }else{
+                p=p->next;
+            }
+        }
+        return NULL;
+    }
+}
+
+//增加数组记录
+void addArrRec(Node* ID){
     if(ID == NULL){
         printf("error get info from ID");
         return;
     }else{
-        FuncRec* newNode = (FuncRec*)malloc(sizeof(FuncRec));
-        
+        ArrRec* newNode = (ArrRec*)malloc(sizeof(ArrRec));
+        newNode->name = ID->sval;
+        newNode->type = ID->subType;
+        newNode->next = NULL;
+        newNode->dim = ID->arrDim;
+        arr_tail->next = newNode;
+        arr_tail = arr_tail->next;
         return;
     }
 }
 
+//查找数组记录，找不到返回NULL，找到了就返回指针
+ArrRec* checkArrRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return NULL;
+    }else{
+        ArrRec* p = arr_head;
+        if(p->next==NULL){
+            return NULL;
+        }
+        p=p->next;
+        while (p!=NULL)
+        {
+            if(!strcmp(p->name, ID->sval)){
+                return p;
+            }else{
+                p=p->next;
+            }
+        }
+        return NULL;
+    }
+}
 
+//增加结构体记录
+void addStRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return;
+    }else{
+        StRec* newNode = (StRec*)malloc(sizeof(StRec));
+        newNode->name = ID->sval;
+        newNode->def_list = ID->stdefList;
+        newNode->next = NULL;
+        st_tail->next = newNode;
+        st_tail = st_tail->next;
+        return;
+    }
+}
 
-
+//查找结构体记录，找不到返回NULL，找到了就返回指针
+StRec* checkStRec(Node* ID){
+    if(ID == NULL){
+        printf("error get info from ID");
+        return NULL;
+    }else{
+        StRec* p = st_head;
+        if(p->next==NULL){
+            return NULL;
+        }
+        p=p->next;
+        while (p!=NULL)
+        {
+            if(!strcmp(p->name, ID->sval)){
+                return p;
+            }else{
+                p=p->next;
+            }
+        }
+        return NULL;
+    }
+}
 
 int power(int a, int b){
     int out = 1;
@@ -256,7 +383,16 @@ void showTree(Node* root, int level){
                 }
                 printf("\n");
             }else if(root->type==5){
-                printf("ID:%s(%d)artp(%d)\n", root->sval, root->type, root->subType);
+                printf("ID:%s(%d)artp(%d)ardm(%d)\n", root->sval, root->type, root->subType, root->arrDim);
+            }else if(root->type==3){
+                printf("ID:%s(%d)st", root->sval, root->type);
+                VarRec* p = root->stdefList;
+                while (p)
+                {
+                    printf("[%s:%d]", p->name, p->type);
+                    p=p->next;
+                }
+                printf("\n");
             }else{
                 printf("ID:%s(%d)\n", root->sval, root->type);
             }

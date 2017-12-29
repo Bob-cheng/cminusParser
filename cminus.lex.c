@@ -568,7 +568,7 @@ int yycolumn = 1;
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
 yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
 yycolumn += yyleng;
-int iserror = 0;
+int iserror = 1;
 #line 573 "cminus.lex.c"
 
 #define INITIAL 0
@@ -2152,6 +2152,9 @@ int main(int argc, char **argv)
     st_tail = st_head;
     st_head->next=NULL;
 
+    PARMList=NULL;
+    STDefList=NULL;
+    STDclList=NULL;
     if(argc > 1) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);
@@ -2172,8 +2175,8 @@ void yyerrorA()
     fprintf(stderr, "Error type A at Line %d:%d Mysterious character '%s'\n", yylineno, yylloc.first_column, yytext);
 }
 
-void yyerrorB(char* info) //test
-{
-    iserror = 1;
-    //fprintf(stderr, "Error type B at Line %d:%d %s \n", yylineno,yylloc.first_column, info);
+void myerror(int type, char * s){
+    //iserror = 1;
+    fprintf(stderr, "Error type %d at Line %d:%d %s \n",type, yylineno,yylloc.first_column, s);
 }
+
