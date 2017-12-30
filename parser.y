@@ -53,7 +53,17 @@ ExtDef: Specifier ExtDecList SEMI   {$$ = own3Child("ExtDef", $1, $2, $3);}
                                     if(addFuncRec($2->children[0]) == 0){
                                     myerror(4, "函数出现重复定义");
                                     }
+                                /*检查函数的返回类型*/
+                                FUNCRt* p =  FUNCRtType;
+                                while(p){
+                                    if(p->type != $1->type){
+                                        printf("Error type 8 at Line %d: return语句的返回类型与函数定义的返回类型不匹配。\n",p->line);
+                                    }
+                                    p = p->next;
                                 }
+                                FUNCRtType=NULL;
+                                }
+                                
 | error SEMI                {$$ = own0Child("ExtDef");}
 ;
 
@@ -73,14 +83,6 @@ StructSpecifier: STRUCT OptTag LC DefList RC  {//这个是结构体在定义
                                                 $$ = own5Child("StructSpecifier", $1, $2, $3, $4, $5);
                                                STDclList = STDefList;//给出当前的声明结构体参数表
                                                 if($2->chCount!=0){
-                                                    VarRec* p = STDefList;
-                                                    while(p){
-                                                        if(p->type == -1){
-                                                            myerror(15, "结构体中域名重复定义，或在定义时对域进行初始化");
-                                                            break;
-                                                        }
-                                                        p = p->next;
-                                                    }
                                                     ($2->children[0])->stdefList=STDefList;//设置结构体定义
                                                     //outPutLinks(STDefList);
                                                     if(addVarRec($2->children[0]) == 0){
@@ -89,6 +91,7 @@ StructSpecifier: STRUCT OptTag LC DefList RC  {//这个是结构体在定义
                                                         addStRec($2->children[0]);//增加结构体记录
                                                     }
                                                 }
+                                                ISDefSt=0;
                                                 STDefList=NULL;}
 | STRUCT Tag                { //这个是结构体在使用
                                 $$ = own2Child("StructSpecifier", $1, $2);
@@ -96,8 +99,11 @@ StructSpecifier: STRUCT OptTag LC DefList RC  {//这个是结构体在定义
                             }
 ;
 OptTag:                     {//这个是结构体在定义
-                            $$ = own0Child("OptTag");}
+                            $$ = own0Child("OptTag");
+                            ISDefSt=1;
+                            }
 |  ID                        {$$ = own1Child("OptTag", $1);  $1->type = 3;
+                            ISDefSt=1;
                             }
 ;
 Tag: ID                     {//这个是结构体在使用
@@ -158,7 +164,14 @@ StmtList:               {$$ = own0Child("StmtList");}
 ;
 Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
 | CompSt                {$$ = own1Child("Stmt", $1);}
-| RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);}
+| RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);
+                            //添加返回链表
+                            FUNCRt* newNode = (FUNCRt*)malloc(sizeof(FUNCRt));
+                            newNode->line = $1->lineNo;
+                            newNode->type = $2->type;
+                            newNode->next = FUNCRtType;
+                            FUNCRtType = newNode;
+                         }
 | IF LP Exp RP Stmt    %prec AFTER_ELSE {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
 | IF LP Exp RP Stmt ELSE Stmt {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);}
 | WHILE LP Exp RP Stmt  {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}
@@ -175,16 +188,21 @@ DecList: Dec            {$$ = own1Child("DecList", $1);}
 |  Dec COMMA  DecList     {$$ = own3Child("DecList", $1, $2, $3);}
 ;
 Dec:  VarDec             {$$ =  own1Child("Dec", $1);
+                        if(ISDefSt){
                           VarRec* newNode = (VarRec*)malloc(sizeof(newNode));
                           newNode->name=$1->sval;
                           newNode->type=$1->type;
                           addToSTDefList(newNode);
+                        }
+                          
                           }
 |  VarDec ASSIGNOP Exp   {$$ =  own3Child("Dec", $1, $2, $3);
-                          VarRec* newNode = (VarRec*)malloc(sizeof(newNode));
-                          newNode->name=$1->sval;
-                          newNode->type=-1; //表示这个类型有问题，因为在结构体中不能有赋值的操作
-                          addToSTDefList(newNode);
+                            if(ISDefSt == 1){
+                                myerror(15, "在定义时对域进行初始化");
+                            }
+                            if($1->type != $3->type){
+                                myerror(5, "赋值号两边的表达式类型不匹配。");
+                            }
                           }
 ;
 
@@ -211,7 +229,12 @@ VarDec:  ID VarDec_x  {$$ = own2Child("VarDec", $1, $2);
                     $$->type = $1->type;
                     $$->sval = $1->sval;
                     if(addVarRec($1) == 0){
-                        myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+                        if(ISDefSt){
+                            myerror(5, "结构体中域名重复定义");
+                        }else{
+                            myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+                        }
+                        
                     }}
 ;
 VarDec_x:              {$$ = own0Child("VarDec_x"); $$->type = 0; $$->arrDim=0; }

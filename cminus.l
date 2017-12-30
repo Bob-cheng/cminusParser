@@ -161,6 +161,7 @@ int main(int argc, char **argv)
     PARMList=NULL;
     STDefList=NULL;
     STDclList=NULL;
+    FUNCRtType=NULL;
     if(argc > 1) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);

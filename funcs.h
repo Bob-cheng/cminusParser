@@ -1,6 +1,7 @@
 #ifndef HEAD
 #define  HEAD
 int IDType; //记录当前的ID类型的全局变量
+int ISDefSt; // 表示是否是在定义结构体
 
 
 typedef struct VarRec
@@ -13,6 +14,14 @@ VarRec* var_head, *var_tail;
 VarRec* PARMList;//记录函数参数类型和名字的链表
 VarRec* STDefList;//结构体定义的时候的参数列表
 VarRec* STDclList;//结构体声明的时候的参数列表
+
+typedef struct FUNCRt
+{
+    int type; //返回的类型 0->not know 1->int 2->float 3->struct 4->func 5->array 
+    int line; //返回的时候的行号
+    struct FUNCRt* next;
+} FUNCRt;
+FUNCRt* FUNCRtType;//记录函数中的各返回语句返回的类型，type字段用来记录行号。
 
 typedef struct Node
 {

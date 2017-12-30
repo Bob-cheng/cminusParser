@@ -12,11 +12,15 @@ i = i + 1;
 return i;
 }
 
-int mymain(float aaa, struct MyStruct bbb, int abc[12]){
-    int ccc;
+int mymain(float aaa, struct MyStruct bbb, float abc[12]){
+    int ccc=1;
     ccc = bbb.a;
     aaa = abc[10];
-
     ccc = inc(1,3,1.5);
-    return ccc;
+    if(ccc == 1){
+        return 0.0;
+    }else{
+        return 1.0;
+    }
+
 }
