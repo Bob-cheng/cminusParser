@@ -25,6 +25,22 @@ void outPutLinks(VarRec* link){
     printf("\n---link-end\n");
 }
 
+int checkListTypeEqual(VarRec* link, VarRec* link2){
+    VarRec *p=link, *q=link2;
+    int flag = 1;
+    while(p || q){
+        if(p == NULL | q == NULL){
+            flag = 0;
+            break;
+        }else if(p->type != q->type){
+                flag = 0;
+                break;
+        }
+        p = p->next; q = q->next;
+    }
+    return flag;
+}
+
 void debug(){
     printf("\n--------debug---------\n");
 }

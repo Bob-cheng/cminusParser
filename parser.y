@@ -247,6 +247,10 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                             
                         }else if($1->subType == -1){
                             myerror(6, "赋值号左边出现一个只有右值的表达式。");
+                        }else if($1->type == 5 && ($1->subType != $3->subType || $1->arrDim != $3->arrDim)){
+                            myerror(6, "赋值号两边的表达式类型不匹配。数组需要类型和维度都相同");
+                        }else if($1->type == 3 && !checkListTypeEqual($1->stdefList, $3->stdefList)){
+                            myerror(6, "赋值号两边的表达式类型不匹配。结构体类型不等价 ");
                         }else{
                             $$->type = $1->type;
                         }}

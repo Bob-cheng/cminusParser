@@ -2178,6 +2178,7 @@ void yyerrorA()
 
 void myerror(int type, char * s){
     //iserror = 1;
-    fprintf(stderr, "Error type %d at Line %d:%d %s \n",type, yylineno,yylloc.first_column, s);
+    fprintf(stderr, "Error type %d at Line %d %s \n",type, yylineno, s);
+    exit(1);
 }
 

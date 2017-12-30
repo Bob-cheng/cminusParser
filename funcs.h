@@ -94,7 +94,7 @@ ArrRec* checkArrRec(Node* ID);
 void addStRec(Node* ID);
 StRec* checkStRec(Node* ID);
 void debug();
-//Node* setRtType(Node* in, int type);
+int checkListTypeEqual(VarRec* link, VarRec* link2);
 void addToParmList(VarRec* node);
 void addToSTDefList(VarRec* node);
 void outPutLinks(VarRec* link);
