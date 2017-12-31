@@ -21,6 +21,8 @@ return i;
 
 int mymain(float aaa, struct MyStruct bbb, float abc[12],struct MyStruct bbb2){
     int ccc=1;
+    ccc = read();
+    write(ccc);
     ab = bbb2;
     ccc = ab.a;
     aaa = abc[10];

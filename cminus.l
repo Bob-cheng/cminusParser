@@ -30,15 +30,16 @@ ws              [ \t]+
     yylval.node = np;
     return FLOAT;}
 ";"             {
-    Node* np = getTermNode(yylineno, "SEMI");
+    Node* np = getStrNode(yytext,yylineno, "SEMI", yyleng);
     yylval.node = np;
+    SPECIALFUNC=0;
     return SEMI;}
 ","             {
-    Node* np = getTermNode(yylineno, "COMMA");
+    Node* np = getStrNode(yytext,yylineno, "COMMA", yyleng);
     yylval.node = np;
     return COMMA;}
 "="             {
-    Node* np = getTermNode(yylineno, "ASSIGNOP");
+    Node* np = getStrNode(yytext,yylineno, "ASSIGNOP", yyleng);
     yylval.node = np;
     return ASSIGNOP;}
 ">"|"<"|">="|"<="|"=="|"!="     {
@@ -46,35 +47,35 @@ ws              [ \t]+
     yylval.node = np;
     return RELOP;}
 "+"             {
-    Node* np = getTermNode(yylineno, "PLUS");
+    Node* np = getStrNode(yytext,yylineno, "PLUS", yyleng);
     yylval.node = np;
     return PLUS;}
 "-"             {
-    Node* np = getTermNode(yylineno, "MINUS");
+    Node* np = getStrNode(yytext,yylineno, "MINUS", yyleng);
     yylval.node = np;
     return MINUS;}
 "*"             {
-    Node* np = getTermNode(yylineno, "STAR");
+    Node* np = getStrNode(yytext,yylineno, "STAR", yyleng);
     yylval.node = np;
     return STAR;}
 "/"             {
-    Node* np = getTermNode(yylineno, "DIV");
+    Node* np = getStrNode(yytext,yylineno, "DIV", yyleng);
     yylval.node = np;
     return DIV;}
 "||"            {
-    Node* np = getTermNode(yylineno, "OR");
+    Node* np = getStrNode(yytext,yylineno, "OR", yyleng);
     yylval.node = np;
     return OR;}
 "&&"            {
-    Node* np = getTermNode(yylineno, "AND");
+    Node* np = getStrNode(yytext,yylineno, "AND", yyleng);
     yylval.node = np;
     return AND;}
 "."             {
-    Node* np = getTermNode(yylineno, "DOT");
+    Node* np = getStrNode(yytext,yylineno, "DOT", yyleng);
     yylval.node = np;
     return DOT;}
 "!"             {
-    Node* np = getTermNode(yylineno, "NOT");
+    Node* np = getStrNode(yytext,yylineno, "NOT", yyleng);
     yylval.node = np;
     return NOT;}
 "int"           {
@@ -89,51 +90,54 @@ ws              [ \t]+
     return TYPE;}
 
 "("             {
-    Node* np = getTermNode(yylineno, "LP");
+    Node* np = getStrNode(yytext,yylineno, "LP", yyleng);
     yylval.node = np;
     return LP;}
 ")"             {
-    Node* np = getTermNode(yylineno, "RP");
+    Node* np = getStrNode(yytext,yylineno, "RP",  yyleng);
     yylval.node = np;
     return RP;}
 "["             {
-    Node* np = getTermNode(yylineno, "LB");
+    Node* np = getStrNode(yytext,yylineno, "LB", yyleng);
     yylval.node = np;
     return LB;}
 "]"             {
-    Node* np = getTermNode(yylineno, "RB");
+    Node* np = getStrNode(yytext,yylineno, "RB", yyleng);
     yylval.node = np;
     return RB;}
 "{"             {
-    Node* np = getTermNode(yylineno, "LC");
+    Node* np = getStrNode(yytext,yylineno, "LC", yyleng);
     yylval.node = np;
     return LC;}
 "}"             {
-    Node* np = getTermNode(yylineno, "RC");
+    Node* np = getStrNode(yytext,yylineno, "RC", yyleng);
     yylval.node = np;
     return RC;}
 "struct"      {
-    Node* np = getTermNode(yylineno, "STRUCT");
+    Node* np = getStrNode(yytext,yylineno, "STRUCT", yyleng);
     yylval.node = np;
     return STRUCT;}
 "return"        {
-    Node* np = getTermNode(yylineno, "RETURN");
+    Node* np = getStrNode(yytext,yylineno, "RETURN", yyleng);
     yylval.node = np;
     return RETURN;}
 "if"            {
-    Node* np = getTermNode(yylineno, "IF");
+    Node* np = getStrNode(yytext,yylineno, "IF", yyleng);
     yylval.node = np;
     return IF;}
 "else"          {
-    Node* np = getTermNode(yylineno, "ELSE");
+    Node* np = getStrNode(yytext,yylineno, "ELSE", yyleng);
     yylval.node = np;
     return ELSE;}
 "while"         {
-    Node* np = getTermNode(yylineno, "WHILE");
+    Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
     yylval.node = np;
     return WHILE;}
 {id}            {
     Node* np = getStrNode(yytext, yylineno, "ID", yyleng);
+    if(!strcmp(np->sval, "write")){
+        SPECIALFUNC=1;
+    }
     yylval.node = np;
     return ID;}
 .   {yyerrorA();}
@@ -142,26 +146,8 @@ ws              [ \t]+
 
 int main(int argc, char **argv)
 {
-    var_head = (VarRec*)malloc(sizeof(VarRec));
-    var_tail = var_head;
-    var_head->next=NULL;
+    initiate();
 
-    func_head = (FuncRec*)malloc(sizeof(FuncRec));
-    func_tail = func_head;
-    func_head->next=NULL;
-
-    arr_head = (ArrRec*)malloc(sizeof(ArrRec));
-    arr_tail = arr_head;
-    arr_head->next=NULL;
-
-    st_head = (StRec*)malloc(sizeof(StRec));
-    st_tail = st_head;
-    st_head->next=NULL;
-
-    PARMList=NULL;
-    STDefList=NULL;
-    STDclList=NULL;
-    FUNCRtType=NULL;
     if(argc > 1) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);

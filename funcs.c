@@ -2,8 +2,153 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-# include<stdarg.h>
 #include "funcs.h"
+
+void _AEqualB_(char* a, char* b){
+    printf("%s := %s\n", a, b);
+}
+
+char* _insNumFmt(char* in){
+    char * out;
+    out = (char*)malloc(sizeof(char)*20);
+    sprintf(out, "#%s", in);
+    return out;
+}
+
+void _callFunc_(Node* ss, Node* s1, Node* s3){
+    if(s3 == NULL){
+        s3 = (Node*)malloc(sizeof(Node));
+        s3->parmList=NULL;
+        s3->parmCnt=0;
+    }
+    VarRec* rcd = checkVarRec(s1);
+    if(rcd != NULL){
+        myerror(11, "对普通变量使用“(…)”或“()”（函数调用）操作符。");
+    }else{
+        FuncRec* funrcd = checkFuncRec(s1);
+        if(funrcd == NULL){
+            myerror(2, "函数在调用时未经定义。");
+        }else if(funrcd->para_count != s3->parmCnt){
+            myerror(9, "函数调用时实参与形参的数目不匹配。");
+        }else{
+            VarRec* p = funrcd->def_list;
+            VarRec* q = s3->parmList;
+            int flag = 1;
+            while(p || q){
+                if(p == NULL | q == NULL){
+                    flag = 0;
+                    break;
+                }
+                if(p->type != q->type){
+                    flag = 0;
+                }
+                p = p->next;
+                q = q->next;
+            }
+            if(flag == 0){
+                myerror(9, "函数调用时实参与形参类型不匹配。");
+            }
+            ss->type = funrcd->rtype;
+            char* t;
+            _getNewTemp(&t);
+            ss->coreName = t;
+            char tt[20];
+            sprintf(tt, "CALL %s", s1->sval);
+            _AEqualB_(t, tt);
+        }
+        
+        
+    }
+}
+
+void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3){
+    if(s1->type != s3->type || s1->type == 3 || s1->type == 4 || s1->type == 5){
+        myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
+    }else{
+        ss->type = s1->type;
+    }
+    char* t;
+    _getNewTemp(&t);
+    ss->coreName = t;
+    char tt[20];
+    sprintf(tt, "%s %s %s", s1->coreName, s2->sval, s3->coreName);
+    _AEqualB_(t, tt);
+}
+
+void _decFunc_(Node * ID){
+    printf("FUNCTION %s :\n", ID->sval);
+    VarRec* p = ID->parmList;
+    while (p){
+        char * v;
+        v = _checkCoreName(p->name);
+        printf("PARAM %s\n", v);
+        p = p->next;
+    }
+}
+
+char* _checkCoreName(char* varname){
+    char * out = NULL;
+    VarRec* p = var_head;
+    p = p->next;
+    while (p){
+        if(!strcmp(p->name, varname)){
+            out = p->coreName;
+            break;
+        }
+        p = p->next;
+    }
+    return out;
+} 
+
+void _arrDefOperation_(Node* ss, Node* s1, Node*s2){
+    s1->type = IDType;
+    //如果ID是结构体而不是结构体数组的时候，为ID添加结构体内容链。
+    if(s1->type == 3 && s2->type != 5){
+        s1->stdefList = STDclList;
+        addStRec(s1);
+    }
+    //如果是数组的话则改变ID的类型，否则不变。
+    if(s2->type == 5){
+        s1->subType = s1->type;
+        s1->type = 5;
+        s1->arrDim = s2->arrDim;
+        addArrRec(s1);
+    }
+    //让VarDec包含ID的类型和值
+    ss->type = s1->type;
+    ss->sval = s1->sval;
+    if(addVarRec(s1) == 0){
+        if(ISDefSt){
+            myerror(5, "结构体中域名重复定义");
+        }else{
+            myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+        }
+    }
+    if(s1->type == 5){
+        printf("DEC %s %d\n", s1->coreName, s2->subType*4);
+    }
+}
+
+void _getNewVar(char** out){
+    VARnum++;
+    (*out) = (char*)malloc(sizeof(char)*20);
+    sprintf((*out), "v_%03d", VARnum);
+    return;
+}
+
+void _getNewTemp(char** out){
+    TEMPnum++;
+    (*out) = (char*)malloc(sizeof(char)*20);
+    sprintf((*out), "t_%03d", TEMPnum);
+    return;
+}
+
+void _getNewLabel(char** out){
+    LABELnum++;
+    (*out) = (char*)malloc(sizeof(char)*20);
+    sprintf((*out), "label_%03d", LABELnum);
+    return;
+}
 
 void addToParmList(VarRec* node){
     node->next = PARMList;
@@ -23,6 +168,40 @@ void outPutLinks(VarRec* link){
         link = link->next;
     }
     printf("\n---link-end\n");
+}
+
+void funcDefOption(Node* ss, Node* s1, Node* s2, Node* s3){
+    //设置返回值类型
+    (s2->children[0])->subType = s1->type;
+        // if(addFuncRec(s2->children[0]) == 0){
+        // myerror(4, "函数出现重复定义");
+        // }
+    FuncRec* q = func_head;
+    q=q->next;
+    int flag = 0;
+    while(q){
+        if(!strcmp(q->name, (s2->children[0])->sval)){
+            q->rtype = s1->type;
+            flag = 1;
+            break;
+        }
+        q=q->next;
+    }
+    if(flag==0){
+        debug();
+    }
+    /*检查函数的返回类型*/
+    FUNCRt* p =  FUNCRtType;
+    if(p == NULL){
+        myerror(8, "函数缺少返回值");
+    }
+    while(p){
+        if(p->type != s1->type){
+            printf("Error type 8 at Line %d: return语句的返回类型与函数定义的返回类型不匹配。\n",p->line);
+        }
+        p = p->next;
+    }
+    FUNCRtType=NULL;
 }
 
 int checkListTypeEqual(VarRec* link, VarRec* link2){
@@ -55,11 +234,17 @@ int addVarRec(Node* ID){
         return 0;
     }else{
         VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
+        char* v;
+        _getNewVar(&v);
+        newNode->coreName = v; //增加变量在中间代码中的名字。
+        ID->coreName = v; //也将这个值返回给ID
         newNode->name = ID->sval;
         newNode->type = ID->type;
         newNode->next = NULL;
         var_tail->next = newNode;
         var_tail = var_tail->next;
+
+
         return 1;
     }
 }
@@ -274,6 +459,7 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     Nptr->tkName = tkName;
     Nptr->lineNo = lineno;
     Nptr->chCount = 0;
+    Nptr->sval = str;
     if(!strcmp(tkName, "FLOAT")){
         //Nptr->type = "float";
         if(strchr(str, 'e') != NULL){
@@ -290,8 +476,6 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
         }else{
             Nptr -> ival = atoi(str);
         }
-    }else{
-        Nptr->sval = str;
     }
     return Nptr;
 }
@@ -371,7 +555,50 @@ Node* own7Child(char* tkName, Node* ch0, Node* ch1,
     return Nptr;
 }
 
+void initiate(){
+    var_head = (VarRec*)malloc(sizeof(VarRec));
+    var_tail = var_head;
+    var_head->next=NULL;
 
+    func_head = (FuncRec*)malloc(sizeof(FuncRec));
+    func_tail = func_head;
+    func_head->next=NULL;
+
+    arr_head = (ArrRec*)malloc(sizeof(ArrRec));
+    arr_tail = arr_head;
+    arr_head->next=NULL;
+
+    st_head = (StRec*)malloc(sizeof(StRec));
+    st_tail = st_head;
+    st_head->next=NULL;
+
+    PARMList=NULL;
+    STDefList=NULL;
+    STDclList=NULL;
+    FUNCRtType=NULL;
+    LABELnum = 0;
+    VARnum = 0;
+    TEMPnum = 0;
+    SPECIALFUNC=0;
+
+    Node* funcRead = (Node*)malloc(sizeof(Node));
+    funcRead->sval = "read";
+    funcRead->subType = 1; //返回的是从控制台读入的数据
+    funcRead->parmList = NULL;
+    funcRead->parmCnt = 0;
+    addFuncRec(funcRead);
+
+    Node* funcWrite = (Node*)malloc(sizeof(Node));
+    funcWrite->sval = "write";
+    funcWrite->subType = 1; // 返回值固定为0;
+    VarRec* intParm = (VarRec*)malloc(sizeof(VarRec));
+    intParm->type = 1;
+    intParm->name = "undefined";
+    intParm->next = NULL;
+    funcWrite->parmList = intParm;
+    funcWrite->parmCnt = 1;
+    addFuncRec(funcWrite);
+}
 
 void showTree(Node* root, int level){
     if(root->nodeType == 1 && root->chCount != 0){

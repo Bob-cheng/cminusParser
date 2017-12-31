@@ -48,20 +48,7 @@ ExtDefList:                 {$$ = own0Child("ExtDefList");}
 ExtDef: Specifier ExtDecList SEMI   {$$ = own3Child("ExtDef", $1, $2, $3);}
 | Specifier SEMI            {$$ = own2Child("ExtDef", $1, $2);}
 | Specifier  FunDec CompSt   {$$ = own3Child("ExtDef", $1, $2, $3);
-                                //设置函数ID的返回类型
-                                ($2->children[0])->subType = $1->type;
-                                    if(addFuncRec($2->children[0]) == 0){
-                                    myerror(4, "函数出现重复定义");
-                                    }
-                                /*检查函数的返回类型*/
-                                FUNCRt* p =  FUNCRtType;
-                                while(p){
-                                    if(p->type != $1->type){
-                                        printf("Error type 8 at Line %d: return语句的返回类型与函数定义的返回类型不匹配。\n",p->line);
-                                    }
-                                    p = p->next;
-                                }
-                                FUNCRtType=NULL;
+                                funcDefOption($$, $1, $2, $3);
                                 }
                                 
 | error SEMI                {$$ = own0Child("ExtDef");}
@@ -125,7 +112,10 @@ FunDec: ID LP VarList RP       {$$ = own4Child("FunDec", $1, $2, $3, $4);
                             $1->parmCnt = $3->parmCnt;
                             $1->parmList = PARMList;
                             PARMList = NULL;
-                            //添加到函数表在上层进行操作，为了拥有返回值
+                            if(addFuncRec($1) == 0){
+                                    myerror(4, "函数出现重复定义");
+                            }
+                            _decFunc_($1);
                             }
 |   ID LP RP                  {$$ = own3Child("FunDec", $1, $2, $3);
                                 $1->type = 4;  
@@ -133,7 +123,10 @@ FunDec: ID LP VarList RP       {$$ = own4Child("FunDec", $1, $2, $3, $4);
                                 $1->parmCnt = 0;
                                 $1->parmList = NULL;
                                 PARMList = NULL;
-                                //添加到函数表在上层进行操作，为了拥有返回值
+                                if(addFuncRec($1) == 0){
+                                    myerror(4, "函数出现重复定义");
+                                }
+                                _decFunc_($1);
                             }
 ;
 VarList: ParamDec COMMA VarList  {$$ = own3Child("VarList", $1, $2, $3);
@@ -171,6 +164,7 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
                             newNode->type = $2->type;
                             newNode->next = FUNCRtType;
                             FUNCRtType = newNode;
+                            printf("RETURN %s\n", $2->coreName);
                          }
 | IF LP Exp RP Stmt    %prec AFTER_ELSE {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
 | IF LP Exp RP Stmt ELSE Stmt {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);}
@@ -212,33 +206,18 @@ Dec:  VarDec             {$$ =  own1Child("Dec", $1);
 //消除左递归
 
 VarDec:  ID VarDec_x  {$$ = own2Child("VarDec", $1, $2); 
-                    $1->type = IDType;
-                    //如果ID是结构体而不是结构体数组的时候，为ID添加结构体内容链。
-                    if($1->type == 3 && $2->type != 5){
-                        $1->stdefList = STDclList;
-                        addStRec($1);
+                    _arrDefOperation_($$, $1, $2);
                     }
-                    //如果是数组的话则改变ID的类型，否则不变。
-                    if($2->type == 5){
-                        $1->subType = $1->type;
-                        $1->type = 5;
-                        $1->arrDim = $2->arrDim;
-                        addArrRec($1);
-                    }
-                    //让VarDec包含ID的类型和值
-                    $$->type = $1->type;
-                    $$->sval = $1->sval;
-                    if(addVarRec($1) == 0){
-                        if(ISDefSt){
-                            myerror(5, "结构体中域名重复定义");
-                        }else{
-                            myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
-                        }
-                        
-                    }}
 ;
-VarDec_x:              {$$ = own0Child("VarDec_x"); $$->type = 0; $$->arrDim=0; }
-| LB INT RB VarDec_x  {$$ = own4Child("VarDec_x", $1, $2, $3, $4); $$->type = 5; $$->arrDim = $4->arrDim+1;}
+VarDec_x:              {$$ = own0Child("VarDec_x"); 
+                        $$->type = 0; $$->arrDim=0; 
+                        $$->subType=1; //用subtype来表示分配空间的大小
+                        }
+| LB INT RB VarDec_x  {$$ = own4Child("VarDec_x", $1, $2, $3, $4); 
+                        $$->type = 5; 
+                        $$->arrDim = $4->arrDim+1;
+                        $$->subType= $4->subType * $2->ival;
+                        }
 ;
 
 Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
@@ -253,7 +232,15 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                             myerror(6, "赋值号两边的表达式类型不匹配。结构体类型不等价 ");
                         }else{
                             $$->type = $1->type;
-                        }}
+                            if($1->subCoreName){
+                                printf("*%s := %s\n", $1->subCoreName, $3->coreName);
+                                printf("%s := *%s\n", $1->coreName, $1->subCoreName);
+                            }else{
+                                _AEqualB_($1->coreName, $3->coreName);
+                            }
+                            $$->coreName = $1->coreName;
+                        }
+                        }
 | Exp AND Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     if($1->type != $3->type || $1->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
@@ -270,40 +257,36 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     if($1->type != $3->type || $1->type == 3 || $1->type == 4 || $1->type == 5){
                         myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
                     }else{
-                        $$->type = $1->type;
+                        //$$->type = $1->type;
+                        $$->type = 1;
                     }}
 | Exp PLUS Exp   {$$ = own3Child("Exp", $1, $2, $3);
-                    if($1->type != $3->type || $1->type == 3 || $1->type == 4 || $1->type == 5){
-                        myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
-                    }else{
-                        $$->type = $1->type;
-                    }}
+                    _expOption_($$, $1, $2, $3);
+                    }
 | Exp MINUS Exp  {$$ = own3Child("Exp", $1, $2, $3);
-                    if($1->type != $3->type || $1->type == 3 || $1->type == 4 || $1->type == 5){
-                        myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
-                    }else{
-                        $$->type = $1->type;
-                    }}
+                    _expOption_($$, $1, $2, $3);
+                    }
 | Exp STAR Exp   {$$ = own3Child("Exp", $1, $2, $3);
-                    if($1->type != $3->type || $1->type == 3 || $1->type == 4 || $1->type == 5){
-                        myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
-                    }else{
-                        $$->type = $1->type;
-                    }}
+                    _expOption_($$, $1, $2, $3);
+                    }
 | Exp DIV Exp    {$$ = own3Child("Exp", $1, $2, $3);
-                    if($1->type != $3->type || $1->type == 3 || $1->type == 4 || $1->type == 5){
-                        myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
-                    }else{
-                        $$->type = $1->type;
-                    }}
+                    _expOption_($$, $1, $2, $3);
+                    }
 | LP Exp RP      {$$ = own3Child("Exp", $1, $2, $3);
-                    $$->type = $2->type;}
+                    $$->type = $2->type;
+                    $$->coreName = $2->coreName;}
 | MINUS Exp    %prec RMINUS  {$$ = own2Child("Exp", $1, $2);
                                 if($2->type != 1 && $2->type != 2){
                                     myerror(-2, "仅有int型和float型变量才能参与算术运算。");
                                 }else{
                                     $$->type = $2->type;
                                 }
+                                char* t;
+                                _getNewTemp(&t);
+                                $$->coreName = t;
+                                char tt[20];
+                                sprintf(tt, "- %s", $2->coreName);
+                                _AEqualB_(t, tt);
                             }
 | NOT Exp        {$$ = own2Child("Exp", $1, $2);
                     if($2->type != 1){
@@ -312,51 +295,25 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         $$->type = 1;
                     }}
 | ID LP Args RP  {$$ = own4Child("Exp", $1, $2, $3, $4);
-                    VarRec* rcd = checkVarRec($1);
-                    if(rcd != NULL){
-                        myerror(11, "对普通变量使用“(…)”或“()”（函数调用）操作符。");
+                    if(!strcmp($1->sval, "write")){
+                        printf("WRITE %s\n", $3->coreName);
+                        $$->coreName = "#0";
+                        $$->type = 1;
                     }else{
-                        FuncRec* funrcd = checkFuncRec($1);
-                        if(funrcd == NULL){
-                            myerror(2, "函数在调用时未经定义。");
-                        }else if(funrcd->para_count != $3->parmCnt){
-                            myerror(9, "函数调用时实参与形参的数目不匹配。");
-                        }else{
-                            VarRec* p = funrcd->def_list;
-                            VarRec* q = $3->parmList;
-                            int flag = 1;
-                            if(!p || !q){
-                                myerror(0, "代码逻辑错误");
-                            }
-                            while(p && q){
-                                if(p->type != q->type){
-                                    flag = 0;
-                                }
-                                p = p->next;
-                                q = q->next;
-                            }
-                            if(flag == 0){
-                                myerror(9, "函数调用时实参与形参类型不匹配。");
-                            }
-                        }
-                        $$->type = funrcd->rtype;
-                        
+                        _callFunc_($$, $1, $3); 
                     }
                 }
 | ID LP RP       {$$ = own3Child("Exp", $1, $2, $3);
-                    VarRec* rcd = checkVarRec($1);
-                    if(rcd != NULL){
-                        myerror(11, "对普通变量使用“(…)”或“()”（函数调用）操作符。");
+                    if(!strcmp("read", $1->sval)){
+                        char* t;
+                        _getNewTemp(&t);
+                        printf("READ %s\n", t);
+                        $$->coreName = t;
+                        $$->type = 1;
                     }else{
-                        FuncRec* funrcd = checkFuncRec($1);
-                        if(funrcd == NULL){
-                            myerror(2, "函数在调用时未经定义。");
-                        }else if(funrcd->para_count != 0){
-                            myerror(9, "函数调用时实参与形参的数目不匹配。");
-                        }
-                        $$->type = funrcd->rtype;
-                        
-                    }}
+                        _callFunc_($$, $1, NULL);
+                    }
+                }
 | Exp LB Exp RB  {$$ = own4Child("Exp", $1, $2, $3, $4);
                     if($1->type != 5){
                         myerror(10, "对非数组型变量使用“[…]”（数组访问）操作符。");
@@ -364,10 +321,21 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         myerror(12, "数组访问操作符“[…]”中出现非整数");
                     }else if($1->arrDim == 1){
                         $$->type = $1->subType;
+                        //因为要求中说只考虑一维数组，所以这里不考虑高维数组的情况
+                        char* t1, *t2, *t3;
+                        _getNewTemp(&t1);
+                        _getNewTemp(&t2);                        
+                        _getNewTemp(&t3);                        
+                        printf("%s := %s * 4\n", t1, $3->coreName);
+                        printf("%s := %s + %s\n", t2, $1->coreName, t1);
+                        printf("%s := *%s\n", t3, t2);
+                        $$->coreName = t3;
+                        $$->subCoreName = t2;
                     }else{
                         $$->type = 5;
                         $$->arrDim = ($1->arrDim)-1;
                         $$->subType = $1->subType;
+
                     }
                     }
 | Exp DOT ID   {$$ = own3Child("Exp", $1, $2, $3);
@@ -392,24 +360,36 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                 }
 | ID    {$$ = own1Child("Exp", $1); 
         VarRec* rcd = checkVarRec($1);
-            if(rcd == NULL){
-                myerror(1, "变量在使用时未经定义");
-            }else{
-                
-                $$->type = rcd->type;
-                if($$->type == 3){
-                    StRec* strcd = checkStRec($1);
-                    $$->stdefList = strcd->def_list;
-                }else if($$->type == 5){
-                    ArrRec* arrrcd = checkArrRec($1);
-                    $$-> subType= arrrcd->type;
-                    $$-> arrDim= arrrcd->dim;
-                }
+        if(rcd == NULL){
+            myerror(1, "变量在使用时未经定义");
+        }else{
+            $$->type = rcd->type;
+            $$->coreName = rcd->coreName;
+            if($$->type == 3){
+                StRec* strcd = checkStRec($1);
+                $$->stdefList = strcd->def_list;
+            }else if($$->type == 5){
+                ArrRec* arrrcd = checkArrRec($1);
+                $$-> subType= arrrcd->type;
+                $$-> arrDim= arrrcd->dim;
             }
+        }
         
         }
-| INT   {$$ = own1Child("Exp", $1); $$->type = 1; $$->subType = -1;}
-| FLOAT {$$ = own1Child("Exp", $1); $$->type = 2; $$->subType = -1;}
+| INT   {$$ = own1Child("Exp", $1); $$->type = 1; $$->subType = -1;
+        $$->coreName = _insNumFmt($1->sval);
+        // char* t;
+        // _getNewTemp(&t);
+        // _AEqualB_(t, _insNumFmt($1->sval));
+        // $$->coreName = t;
+}
+| FLOAT {$$ = own1Child("Exp", $1); $$->type = 2; $$->subType = -1;
+        $$->coreName = _insNumFmt($1->sval);
+        // char* t;
+        // _getNewTemp(&t);
+        // _AEqualB_(t, _insNumFmt($1->sval));
+        // $$->coreName = t;
+        }
 ;
 Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
                     $$->parmCnt = ($3->parmCnt)+1;
@@ -417,13 +397,23 @@ Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
                     arg->name=NULL;
                     arg->type=$1->type;
                     arg->next = $3->parmList;
-                    $$->parmList = arg;}
+                    $$->parmList = arg;
+                    $$->coreName = $1->coreName;
+                    if(!SPECIALFUNC){
+                       printf("ARG %s\n", $1->coreName); 
+                    }
+                    }
 | Exp   {$$ = own1Child("Args", $1);
         $$->parmCnt = 1;
         VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
         arg->name=NULL;
         arg->type=$1->type;
-        $$->parmList = arg;}
+        $$->parmList = arg;
+        $$->coreName = $1->coreName;
+        if(!SPECIALFUNC){
+            printf("ARG %s\n", $1->coreName);
+        }
+        }
 ;
 %%
 

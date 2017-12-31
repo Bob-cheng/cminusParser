@@ -901,29 +901,30 @@ case 7:
 YY_RULE_SETUP
 #line 32 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "SEMI");
+    Node* np = getStrNode(yytext,yylineno, "SEMI", yyleng);
     yylval.node = np;
+    SPECIALFUNC=0;
     return SEMI;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "cminus.l"
+#line 37 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "COMMA");
+    Node* np = getStrNode(yytext,yylineno, "COMMA", yyleng);
     yylval.node = np;
     return COMMA;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 40 "cminus.l"
+#line 41 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "ASSIGNOP");
+    Node* np = getStrNode(yytext,yylineno, "ASSIGNOP", yyleng);
     yylval.node = np;
     return ASSIGNOP;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 44 "cminus.l"
+#line 45 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "RELOP", yyleng);
     yylval.node = np;
@@ -931,71 +932,71 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 48 "cminus.l"
+#line 49 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "PLUS");
+    Node* np = getStrNode(yytext,yylineno, "PLUS", yyleng);
     yylval.node = np;
     return PLUS;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 52 "cminus.l"
+#line 53 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "MINUS");
+    Node* np = getStrNode(yytext,yylineno, "MINUS", yyleng);
     yylval.node = np;
     return MINUS;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 56 "cminus.l"
+#line 57 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "STAR");
+    Node* np = getStrNode(yytext,yylineno, "STAR", yyleng);
     yylval.node = np;
     return STAR;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 60 "cminus.l"
+#line 61 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "DIV");
+    Node* np = getStrNode(yytext,yylineno, "DIV", yyleng);
     yylval.node = np;
     return DIV;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 64 "cminus.l"
+#line 65 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "OR");
+    Node* np = getStrNode(yytext,yylineno, "OR", yyleng);
     yylval.node = np;
     return OR;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 68 "cminus.l"
+#line 69 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "AND");
+    Node* np = getStrNode(yytext,yylineno, "AND", yyleng);
     yylval.node = np;
     return AND;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 72 "cminus.l"
+#line 73 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "DOT");
+    Node* np = getStrNode(yytext,yylineno, "DOT", yyleng);
     yylval.node = np;
     return DOT;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 76 "cminus.l"
+#line 77 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "NOT");
+    Node* np = getStrNode(yytext,yylineno, "NOT", yyleng);
     yylval.node = np;
     return NOT;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 80 "cminus.l"
+#line 81 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "TYPE", yyleng);
     np->type = 1; //提前确定类型，int
@@ -1004,7 +1005,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 85 "cminus.l"
+#line 86 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "TYPE", yyleng);
     np->type = 2; //提前确定类型，float
@@ -1013,111 +1014,114 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 91 "cminus.l"
+#line 92 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "LP");
+    Node* np = getStrNode(yytext,yylineno, "LP", yyleng);
     yylval.node = np;
     return LP;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 95 "cminus.l"
+#line 96 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "RP");
+    Node* np = getStrNode(yytext,yylineno, "RP",  yyleng);
     yylval.node = np;
     return RP;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 99 "cminus.l"
+#line 100 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "LB");
+    Node* np = getStrNode(yytext,yylineno, "LB", yyleng);
     yylval.node = np;
     return LB;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 103 "cminus.l"
+#line 104 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "RB");
+    Node* np = getStrNode(yytext,yylineno, "RB", yyleng);
     yylval.node = np;
     return RB;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 107 "cminus.l"
+#line 108 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "LC");
+    Node* np = getStrNode(yytext,yylineno, "LC", yyleng);
     yylval.node = np;
     return LC;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 111 "cminus.l"
+#line 112 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "RC");
+    Node* np = getStrNode(yytext,yylineno, "RC", yyleng);
     yylval.node = np;
     return RC;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 115 "cminus.l"
+#line 116 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "STRUCT");
+    Node* np = getStrNode(yytext,yylineno, "STRUCT", yyleng);
     yylval.node = np;
     return STRUCT;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 119 "cminus.l"
+#line 120 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "RETURN");
+    Node* np = getStrNode(yytext,yylineno, "RETURN", yyleng);
     yylval.node = np;
     return RETURN;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 123 "cminus.l"
+#line 124 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "IF");
+    Node* np = getStrNode(yytext,yylineno, "IF", yyleng);
     yylval.node = np;
     return IF;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 127 "cminus.l"
+#line 128 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "ELSE");
+    Node* np = getStrNode(yytext,yylineno, "ELSE", yyleng);
     yylval.node = np;
     return ELSE;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 131 "cminus.l"
+#line 132 "cminus.l"
 {
-    Node* np = getTermNode(yylineno, "WHILE");
+    Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
     yylval.node = np;
     return WHILE;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 135 "cminus.l"
+#line 136 "cminus.l"
 {
     Node* np = getStrNode(yytext, yylineno, "ID", yyleng);
+    if(!strcmp(np->sval, "write")){
+        SPECIALFUNC=1;
+    }
     yylval.node = np;
     return ID;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 139 "cminus.l"
+#line 143 "cminus.l"
 {yyerrorA();}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 141 "cminus.l"
+#line 145 "cminus.l"
 ECHO;
 	YY_BREAK
-#line 1121 "cminus.lex.c"
+#line 1125 "cminus.lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2130,32 +2134,14 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 141 "cminus.l"
+#line 145 "cminus.l"
 
 
 
 int main(int argc, char **argv)
 {
-    var_head = (VarRec*)malloc(sizeof(VarRec));
-    var_tail = var_head;
-    var_head->next=NULL;
+    initiate();
 
-    func_head = (FuncRec*)malloc(sizeof(FuncRec));
-    func_tail = func_head;
-    func_head->next=NULL;
-
-    arr_head = (ArrRec*)malloc(sizeof(ArrRec));
-    arr_tail = arr_head;
-    arr_head->next=NULL;
-
-    st_head = (StRec*)malloc(sizeof(StRec));
-    st_tail = st_head;
-    st_head->next=NULL;
-
-    PARMList=NULL;
-    STDefList=NULL;
-    STDclList=NULL;
-    FUNCRtType=NULL;
     if(argc > 1) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);

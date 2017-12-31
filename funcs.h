@@ -2,15 +2,19 @@
 #define  HEAD
 int IDType; //记录当前的ID类型的全局变量
 int ISDefSt; // 表示是否是在定义结构体
-
+int VARnum; //中间代码生成的变量标识
+int TEMPnum;//中间代码生成的临时变量标识
+int LABELnum;//中间代码生成的标签标识
+int SPECIALFUNC;
 
 typedef struct VarRec
 {
     int type; //变量的类型 0->not know 1->int 2->float 3->struct 4->func 5->array 
     char* name;//变量的名字 实际上就是 sval
+    char* coreName;//变量在中间代码中的名字
     struct VarRec* next;
 } VarRec;
-VarRec* var_head, *var_tail;
+VarRec* var_head, *var_tail; //注意这个是包含头节点的
 VarRec* PARMList;//记录函数参数类型和名字的链表
 VarRec* STDefList;//结构体定义的时候的参数列表
 VarRec* STDclList;//结构体声明的时候的参数列表
@@ -39,6 +43,8 @@ typedef struct Node
     int arrDim;//如果是[数组]，记录数组的维度
     VarRec* parmList;//如果是[函数]，记录函数的参数列表
     VarRec* stdefList;//如果是[结构体]，记录结构体的参数列表
+    char* coreName;//中间代码生成的名字
+    char* subCoreName;//对于数组来说需要储存两个名字,这个表示的是地址
     //char* type;// 常数的类型 tkName=='FLOAT'或'INT'有效，例如 1->int  1.0->float 
 
 } Node;
@@ -98,9 +104,27 @@ int checkListTypeEqual(VarRec* link, VarRec* link2);
 void addToParmList(VarRec* node);
 void addToSTDefList(VarRec* node);
 void outPutLinks(VarRec* link);
+void initiate();
+void funcDefOption(Node* ss, Node* s1, Node* s2, Node* s3);
+
+
+void _getNewVar(char** out);
+void _getNewTemp(char** out);
+char* _checkCoreName(char* varname);
+void _decFunc_(Node * ID);
+void _getNewLabel(char** out);
+void _AEqualB_(char* a, char* b);
+char* _insNumFmt(char* in);
+void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3);
+void _callFunc_(Node* ss, Node* s1, Node* s3);
+void _arrDefOperation_(Node* ss, Node* s1, Node*s2);
+
+
+
 void yyerror(char * s);
 void yyerrorA();
 void myerror(int type, char * s);
 int yylex ();
+
 //用于创建{}（）+—等符号对应的节
 #endif // !HEAD
