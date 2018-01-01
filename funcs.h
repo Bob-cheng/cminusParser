@@ -5,7 +5,10 @@ int ISDefSt; // 表示是否是在定义结构体
 int VARnum; //中间代码生成的变量标识
 int TEMPnum;//中间代码生成的临时变量标识
 int LABELnum;//中间代码生成的标签标识
-int SPECIALFUNC;
+int SPECIALFUNC;//判断是否是特殊函数的标签
+int TESTFunStage;
+int FUNCRtTypeINT;
+int USESLabel;
 
 typedef struct TFStack{
     int top;
@@ -14,6 +17,7 @@ typedef struct TFStack{
 TFStack tfStack;
 char* EXPTrue;
 char* EXPFalse;
+char* WLBEGIN;
 
 typedef struct SNEXTStack{
     int top;
@@ -133,8 +137,12 @@ char* _insNumFmt(char* in);
 void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3);
 void _callFunc_(Node* ss, Node* s1, Node* s3);
 void _arrDefOperation_(Node* ss, Node* s1, Node*s2);
-
-
+void _pushTfStack();
+void _popTfStack();
+void _pushSNextStack();
+void _popSNextStack();
+void _putLabel_(char* l);
+void _putGoto_(char* l);
 
 void yyerror(char * s);
 void yyerrorA();

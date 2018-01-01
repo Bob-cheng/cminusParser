@@ -5,7 +5,7 @@ int yycolumn = 1;
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
 yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
 yycolumn += yyleng;
-int iserror = 0;
+int iserror = 1;
 %}
 %option yylineno
 
@@ -33,7 +33,9 @@ ws              [ \t]+
     Node* np = getStrNode(yytext,yylineno, "SEMI", yyleng);
     yylval.node = np;
     SPECIALFUNC=0;
-    return SEMI;}
+    return SEMI;
+    TESTFunStage = 0;
+    }
 ","             {
     Node* np = getStrNode(yytext,yylineno, "COMMA", yyleng);
     yylval.node = np;
@@ -92,7 +94,13 @@ ws              [ \t]+
 "("             {
     Node* np = getStrNode(yytext,yylineno, "LP", yyleng);
     yylval.node = np;
-    return LP;}
+    if(TESTFunStage==2){
+        FUNCRtTypeINT=IDType;
+    }else{
+        TESTFunStage=0;
+    }
+    return LP;
+    }
 ")"             {
     Node* np = getStrNode(yytext,yylineno, "RP",  yyleng);
     yylval.node = np;
@@ -122,21 +130,45 @@ ws              [ \t]+
     yylval.node = np;
     return RETURN;}
 "if"            {
+    USESLabel = 1;
     Node* np = getStrNode(yytext,yylineno, "IF", yyleng);
     yylval.node = np;
+    _pushTfStack();
+    char* l1, *l2;
+    _getNewLabel(&l1);
+    _getNewLabel(&l2);
+    EXPTrue = l1;
+    EXPFalse = l2;
     return IF;}
 "else"          {
     Node* np = getStrNode(yytext,yylineno, "ELSE", yyleng);
     yylval.node = np;
+    _putGoto_(STMTNext);
+    _putLabel_(EXPFalse);
     return ELSE;}
 "while"         {
+    USESLabel = 1;
     Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
     yylval.node = np;
+    _pushTfStack();
+    char* l, *l1;
+    _getNewLabel(&l);
+    _getNewLabel(&l1);
+    EXPTrue = l1;
+    EXPFalse = STMTNext;
+    _pushSNextStack();
+    STMTNext=l;
+    _putLabel_(l);
     return WHILE;}
 {id}            {
     Node* np = getStrNode(yytext, yylineno, "ID", yyleng);
     if(!strcmp(np->sval, "write")){
         SPECIALFUNC=1;
+    }
+    if(TESTFunStage == 1){
+        TESTFunStage = 2;
+    }else{
+        TESTFunStage=0;
     }
     yylval.node = np;
     return ID;}

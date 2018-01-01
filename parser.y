@@ -60,10 +60,14 @@ ExtDecList:  VarDec       {$$ = own1Child("ExtDecList", $1);}
 |  VarDec COMMA  ExtDecList   {$$ = own3Child("ExtDecList", $1, $2, $3);}
 ;
 
-Specifier: TYPE             {$$ = own1Child("Specifier", $1);  IDType = $1->type; $$->type = IDType;} //在词法分析文件中给出了
+Specifier: TYPE             {$$ = own1Child("Specifier", $1);
+                            IDType = $1->type; 
+                            $$->type = IDType; 
+                            TESTFunStage=1;} //在词法分析文件中给出了
 | StructSpecifier           {$$ = own1Child("Specifier", $1); 
                             IDType = 3;
                             $$->type = IDType; 
+                            TESTFunStage=1;
                             }
 ;
 StructSpecifier: STRUCT OptTag LC DefList RC  {//这个是结构体在定义
@@ -111,6 +115,7 @@ FunDec: ID LP VarList RP       {$$ = own4Child("FunDec", $1, $2, $3, $4);
                             $1->type = 4;
                             $1->parmCnt = $3->parmCnt;
                             $1->parmList = PARMList;
+                            $1->subType = FUNCRtTypeINT;
                             PARMList = NULL;
                             if(addFuncRec($1) == 0){
                                     myerror(4, "函数出现重复定义");
@@ -157,19 +162,32 @@ StmtList:               {$$ = own0Child("StmtList");}
 ;
 
 PRES:                   {
+                            if(USESLabel == 1){
+                                char* l;
+                            _getNewLabel(&l); 
+                            STMTNext = l;
+                            USESLabel = 0;
+                            }
                             
                         }
 ;
 
-NEWStmt: PRES Stmt      {$$ = own1Child("NEWStmt", $2);}
+NEWStmt: PRES Stmt      {$$ = own1Child("NEWStmt", $2);
+                        if(USESLabel == 1){
+                            _putLabel_(STMTNext);
+                        }
+                        }
 ; 
 
-AFTIF:                  {}
+AFTIF:                  {
+                            _putLabel_(EXPTrue);
+                        }
 ;
-PREWS:                  {}
+PREWS:                  {
+                            _putLabel_(EXPTrue);
+                        }
 ;
-AFTWS:                  {}
-;
+
 Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
 | CompSt                {$$ = own1Child("Stmt", $1);}
 | RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);
@@ -181,9 +199,21 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
                             FUNCRtType = newNode;
                             printf("RETURN %s\n", $2->coreName);
                          }
-| IF LP Exp RP AFTIF Stmt    %prec AFTER_ELSE {$$ = own5Child("Stmt", $1, $2, $3, $4, $6);}    
-| IF LP Exp RP AFTIF Stmt ELSE Stmt {$$ = own7Child("Stmt", $1, $2, $3, $4, $6, $7, $8);}
-| WHILE LP Exp RP  PREWS Stmt AFTWS {$$ = own5Child("Stmt", $1, $2, $3, $4, $6);}
+| IF LP Exp RP AFTIF Stmt    %prec AFTER_ELSE {
+                                    
+                                    $$ = own5Child("Stmt", $1, $2, $3, $4, $6);}    
+| IF LP Exp RP AFTIF Stmt ELSE Stmt  {
+                            
+                            $$ = own7Child("Stmt", $1, $2, $3, $4, $6, $7, $8);
+                            _popTfStack();
+                            }
+| WHILE LP Exp RP  PREWS Stmt {
+                                
+                                $$ = own5Child("Stmt", $1, $2, $3, $4, $6);
+                                _putGoto_(STMTNext);
+                                _popSNextStack();
+                                _popTfStack();
+                                }
 | error SEMI            {$$ = own0Child("Stmt"); }
 ;
 
@@ -275,6 +305,8 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
                     }else{
                         //$$->type = $1->type;
+                        printf("IF %s %s %s GOTO %s\n", $1->coreName, $2->sval, $3->coreName, EXPTrue);
+                        _putGoto_(EXPFalse);
                         $$->type = 1;
                     }}
 | Exp PLUS Exp   {$$ = own3Child("Exp", $1, $2, $3);

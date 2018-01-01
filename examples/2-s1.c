@@ -1,11 +1,9 @@
-int main(){
-    int n,a,b;
-    a =  1;
-    b = a + 1;
-    n = a + b * 1;
-    a = n - b;
-    write(a);
-    n = read();
-    main();
-    return 0;
+int main()
+{
+int n;
+n = read();
+if (n > 0) write(1);
+else if (n < 0) write (-1);
+else write(0);
+return 0;
 }

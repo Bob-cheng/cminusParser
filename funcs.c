@@ -8,6 +8,13 @@ void _AEqualB_(char* a, char* b){
     printf("%s := %s\n", a, b);
 }
 
+void _putLabel_(char* l){
+    printf("LABEL %s :\n", l);
+}
+
+void _putGoto_(char* l){
+    printf("GOTO %s\n", l);
+}
 void _pushTfStack(){
     int top = ++tfStack.top;
     tfStack.stack[top][0] = EXPTrue;
@@ -200,20 +207,20 @@ void funcDefOption(Node* ss, Node* s1, Node* s2, Node* s3){
         // if(addFuncRec(s2->children[0]) == 0){
         // myerror(4, "函数出现重复定义");
         // }
-    FuncRec* q = func_head;
-    q=q->next;
-    int flag = 0;
-    while(q){
-        if(!strcmp(q->name, (s2->children[0])->sval)){
-            q->rtype = s1->type;
-            flag = 1;
-            break;
-        }
-        q=q->next;
-    }
-    if(flag==0){
-        debug();
-    }
+    // FuncRec* q = func_head;
+    // q=q->next;
+    // int flag = 0;
+    // while(q){
+    //     if(!strcmp(q->name, (s2->children[0])->sval)){
+    //         q->rtype = s1->type;
+    //         flag = 1;
+    //         break;
+    //     }
+    //     q=q->next;
+    // }
+    // if(flag==0){
+    //     debug();
+    // }
     /*检查函数的返回类型*/
     FUNCRt* p =  FUNCRtType;
     if(p == NULL){
@@ -604,6 +611,9 @@ void initiate(){
     VARnum = 0;
     TEMPnum = 0;
     SPECIALFUNC=0;
+    TESTFunStage=0;
+    FUNCRtTypeINT=0;
+    USESLabel = 1;
 
     Node* funcRead = (Node*)malloc(sizeof(Node));
     funcRead->sval = "read";
@@ -628,6 +638,7 @@ void initiate(){
     EXPFalse =NULL;
     sNextStack.top=-1;
     STMTNext =NULL;
+    WLBEGIN = NULL;
 }
 
 void showTree(Node* root, int level){
