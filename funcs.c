@@ -8,6 +8,30 @@ void _AEqualB_(char* a, char* b){
     printf("%s := %s\n", a, b);
 }
 
+void _pushTfStack(){
+    int top = ++tfStack.top;
+    tfStack.stack[top][0] = EXPTrue;
+    tfStack.stack[top][1] = EXPFalse;
+}
+
+void _popTfStack(){
+    int top = tfStack.top;
+    EXPTrue = tfStack.stack[top][0];
+    EXPFalse = tfStack.stack[top][1];
+    tfStack.top--;
+}
+
+void _pushSNextStack(){
+    int top = ++sNextStack.top;
+    sNextStack.stack[top] = STMTNext;
+}
+
+void _popSNextStack(){
+    int top = sNextStack.top;
+    STMTNext = sNextStack.stack[top];
+    sNextStack.top--;
+}
+
 char* _insNumFmt(char* in){
     char * out;
     out = (char*)malloc(sizeof(char)*20);
@@ -598,6 +622,12 @@ void initiate(){
     funcWrite->parmList = intParm;
     funcWrite->parmCnt = 1;
     addFuncRec(funcWrite);
+
+    tfStack.top=-1;
+    EXPTrue =NULL;
+    EXPFalse =NULL;
+    sNextStack.top=-1;
+    STMTNext =NULL;
 }
 
 void showTree(Node* root, int level){

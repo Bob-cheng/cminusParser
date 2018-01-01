@@ -21,7 +21,7 @@ extern int iserror;
 
 %type<node> Program ExtDefList ExtDef ExtDecList Specifier
 %type<node> StructSpecifier OptTag Tag VarDec VarDec_x FunDec VarList ParamDec
-%type<node> CompSt StmtList Stmt DefList Dec Exp Args Def DecList 
+%type<node> CompSt StmtList Stmt DefList Dec Exp Args Def DecList NEWStmt 
 
 %nonassoc	AFTER_ELSE
 %nonassoc	ELSE
@@ -153,7 +153,22 @@ CompSt: LC DefList StmtList RC  {$$ = own4Child("CompSt", $1, $2, $3, $4); STDef
 | error RC              {$$ = own0Child("CompSt");}
 ;
 StmtList:               {$$ = own0Child("StmtList");}
-| Stmt StmtList         {$$ = own2Child("StmtList", $1, $2);}
+| NEWStmt StmtList         {$$ = own2Child("StmtList", $1, $2);}
+;
+
+PRES:                   {
+                            
+                        }
+;
+
+NEWStmt: PRES Stmt      {$$ = own1Child("NEWStmt", $2);}
+; 
+
+AFTIF:                  {}
+;
+PREWS:                  {}
+;
+AFTWS:                  {}
 ;
 Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
 | CompSt                {$$ = own1Child("Stmt", $1);}
@@ -166,9 +181,9 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
                             FUNCRtType = newNode;
                             printf("RETURN %s\n", $2->coreName);
                          }
-| IF LP Exp RP Stmt    %prec AFTER_ELSE {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
-| IF LP Exp RP Stmt ELSE Stmt {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);}
-| WHILE LP Exp RP Stmt  {$$ = own5Child("Stmt", $1, $2, $3, $4, $5);}
+| IF LP Exp RP AFTIF Stmt    %prec AFTER_ELSE {$$ = own5Child("Stmt", $1, $2, $3, $4, $6);}    
+| IF LP Exp RP AFTIF Stmt ELSE Stmt {$$ = own7Child("Stmt", $1, $2, $3, $4, $6, $7, $8);}
+| WHILE LP Exp RP  PREWS Stmt AFTWS {$$ = own5Child("Stmt", $1, $2, $3, $4, $6);}
 | error SEMI            {$$ = own0Child("Stmt"); }
 ;
 
@@ -220,6 +235,8 @@ VarDec_x:              {$$ = own0Child("VarDec_x");
                         }
 ;
 
+
+
 Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         if($1->type != $3->type){
                             myerror(5, "赋值号两边的表达式类型不匹配。");
@@ -241,17 +258,17 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                             $$->coreName = $1->coreName;
                         }
                         }
-| Exp AND Exp    {$$ = own3Child("Exp", $1, $2, $3);
+| Exp AND Exp  {$$ = own3Child("Exp", $1, $2, $3);
                     if($1->type != $3->type || $1->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
-                        $$->type = $1->type;
+                        $$->type = 1;
                     }}
 | Exp OR Exp     {$$ = own3Child("Exp", $1, $2, $3);
                     if($1->type != $3->type || $1->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
-                        $$->type = $1->type;
+                        $$->type = 1;
                     }}
 | Exp RELOP Exp  {$$ = own3Child("Exp", $1, $2, $3);
                     if($1->type != $3->type || $1->type == 3 || $1->type == 4 || $1->type == 5){
@@ -288,7 +305,7 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                                 sprintf(tt, "- %s", $2->coreName);
                                 _AEqualB_(t, tt);
                             }
-| NOT Exp        {$$ = own2Child("Exp", $1, $2);
+| NOT Exp     {$$ = own2Child("Exp", $1, $2);
                     if($2->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{

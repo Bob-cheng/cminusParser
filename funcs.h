@@ -7,6 +7,21 @@ int TEMPnum;//中间代码生成的临时变量标识
 int LABELnum;//中间代码生成的标签标识
 int SPECIALFUNC;
 
+typedef struct TFStack{
+    int top;
+    char* stack[100][2];
+} TFStack;
+TFStack tfStack;
+char* EXPTrue;
+char* EXPFalse;
+
+typedef struct SNEXTStack{
+    int top;
+    char* stack[100];
+} SNEXTStack;
+SNEXTStack sNextStack;
+char* STMTNext;
+
 typedef struct VarRec
 {
     int type; //变量的类型 0->not know 1->int 2->float 3->struct 4->func 5->array 
