@@ -39,6 +39,8 @@ void _popSNextStack(){
     sNextStack.top--;
 }
 
+
+
 char* _insNumFmt(char* in){
     char * out;
     out = (char*)malloc(sizeof(char)*20);
@@ -613,7 +615,7 @@ void initiate(){
     SPECIALFUNC=0;
     TESTFunStage=0;
     FUNCRtTypeINT=0;
-    USESLabel = 1;
+    
 
     Node* funcRead = (Node*)malloc(sizeof(Node));
     funcRead->sval = "read";
@@ -638,7 +640,8 @@ void initiate(){
     EXPFalse =NULL;
     sNextStack.top=-1;
     STMTNext =NULL;
-    WLBEGIN = NULL;
+
+
 }
 
 void showTree(Node* root, int level){

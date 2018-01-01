@@ -8,7 +8,7 @@ int LABELnum;//中间代码生成的标签标识
 int SPECIALFUNC;//判断是否是特殊函数的标签
 int TESTFunStage;
 int FUNCRtTypeINT;
-int USESLabel;
+
 
 typedef struct TFStack{
     int top;
@@ -17,7 +17,6 @@ typedef struct TFStack{
 TFStack tfStack;
 char* EXPTrue;
 char* EXPFalse;
-char* WLBEGIN;
 
 typedef struct SNEXTStack{
     int top;
@@ -25,6 +24,7 @@ typedef struct SNEXTStack{
 } SNEXTStack;
 SNEXTStack sNextStack;
 char* STMTNext;
+
 
 typedef struct VarRec
 {

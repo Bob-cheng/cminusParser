@@ -102,6 +102,7 @@ ws              [ \t]+
     return LP;
     }
 ")"             {
+
     Node* np = getStrNode(yytext,yylineno, "RP",  yyleng);
     yylval.node = np;
     return RP;}
@@ -130,7 +131,7 @@ ws              [ \t]+
     yylval.node = np;
     return RETURN;}
 "if"            {
-    USESLabel = 1;
+    
     Node* np = getStrNode(yytext,yylineno, "IF", yyleng);
     yylval.node = np;
     _pushTfStack();
@@ -147,7 +148,6 @@ ws              [ \t]+
     _putLabel_(EXPFalse);
     return ELSE;}
 "while"         {
-    USESLabel = 1;
     Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
     yylval.node = np;
     _pushTfStack();

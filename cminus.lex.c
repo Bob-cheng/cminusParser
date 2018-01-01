@@ -1032,13 +1032,14 @@ case 22:
 YY_RULE_SETUP
 #line 104 "cminus.l"
 {
+
     Node* np = getStrNode(yytext,yylineno, "RP",  yyleng);
     yylval.node = np;
     return RP;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 108 "cminus.l"
+#line 109 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "LB", yyleng);
     yylval.node = np;
@@ -1046,7 +1047,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 112 "cminus.l"
+#line 113 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "RB", yyleng);
     yylval.node = np;
@@ -1054,7 +1055,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 116 "cminus.l"
+#line 117 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "LC", yyleng);
     yylval.node = np;
@@ -1062,7 +1063,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 120 "cminus.l"
+#line 121 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "RC", yyleng);
     yylval.node = np;
@@ -1070,7 +1071,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 124 "cminus.l"
+#line 125 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "STRUCT", yyleng);
     yylval.node = np;
@@ -1078,7 +1079,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 128 "cminus.l"
+#line 129 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "RETURN", yyleng);
     yylval.node = np;
@@ -1086,9 +1087,9 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 132 "cminus.l"
+#line 133 "cminus.l"
 {
-    USESLabel = 1;
+    
     Node* np = getStrNode(yytext,yylineno, "IF", yyleng);
     yylval.node = np;
     _pushTfStack();
@@ -1101,7 +1102,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 143 "cminus.l"
+#line 144 "cminus.l"
 {
     Node* np = getStrNode(yytext,yylineno, "ELSE", yyleng);
     yylval.node = np;
@@ -1111,9 +1112,8 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 149 "cminus.l"
+#line 150 "cminus.l"
 {
-    USESLabel = 1;
     Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
     yylval.node = np;
     _pushTfStack();

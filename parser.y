@@ -161,26 +161,24 @@ StmtList:               {$$ = own0Child("StmtList");}
 | NEWStmt StmtList         {$$ = own2Child("StmtList", $1, $2);}
 ;
 
-PRES:                   {
-                            if(USESLabel == 1){
-                                char* l;
+PRES:                   {   _pushSNextStack();                    
+                            char* l;
                             _getNewLabel(&l); 
                             STMTNext = l;
-                            USESLabel = 0;
-                            }
                             
                         }
 ;
 
-NEWStmt: PRES Stmt      {$$ = own1Child("NEWStmt", $2);
-                        if(USESLabel == 1){
+NEWStmt: PRES Stmt      {
+                            $$ = own1Child("NEWStmt", $2);
                             _putLabel_(STMTNext);
-                        }
+                            _popSNextStack();
                         }
 ; 
 
 AFTIF:                  {
                             _putLabel_(EXPTrue);
+                            
                         }
 ;
 PREWS:                  {
@@ -199,16 +197,14 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
                             FUNCRtType = newNode;
                             printf("RETURN %s\n", $2->coreName);
                          }
-| IF LP Exp RP AFTIF Stmt    %prec AFTER_ELSE {
-                                    
+| IF LP Exp RP AFTIF NEWStmt    %prec AFTER_ELSE {
                                     $$ = own5Child("Stmt", $1, $2, $3, $4, $6);}    
-| IF LP Exp RP AFTIF Stmt ELSE Stmt  {
+| IF LP Exp RP AFTIF NEWStmt ELSE NEWStmt  {
                             
                             $$ = own7Child("Stmt", $1, $2, $3, $4, $6, $7, $8);
                             _popTfStack();
                             }
-| WHILE LP Exp RP  PREWS Stmt {
-                                
+| WHILE LP Exp RP  PREWS NEWStmt {
                                 $$ = own5Child("Stmt", $1, $2, $3, $4, $6);
                                 _putGoto_(STMTNext);
                                 _popSNextStack();
