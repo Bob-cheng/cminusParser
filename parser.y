@@ -171,7 +171,7 @@ PRES:                   {   _pushSNextStack();
 
 NEWStmt: PRES Stmt      {
                             $$ = own1Child("NEWStmt", $2);
-                            _putLabel_(STMTNext);
+                            //_putLabel_(STMTNext);
                             _popSNextStack();
                         }
 ; 
@@ -186,7 +186,7 @@ PREWS:                  {
                         }
 ;
 
-Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);}
+Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2); printCode($1);}
 | CompSt                {$$ = own1Child("Stmt", $1);}
 | RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);
                             //添加返回链表
@@ -238,6 +238,8 @@ Dec:  VarDec             {$$ =  own1Child("Dec", $1);
                             if($1->type != $3->type){
                                 myerror(5, "赋值号两边的表达式类型不匹配。");
                             }
+                            combineNodeCode($$, 2, $1, $3);
+                            addCode($$, getCodeblock(1, s_AEqualB_($1->coreName, $3->coreName)));
                           }
 ;
 
@@ -274,12 +276,19 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         }else if($1->type == 3 && !checkListTypeEqual($1->stdefList, $3->stdefList)){
                             myerror(6, "赋值号两边的表达式类型不匹配。结构体类型不等价 ");
                         }else{
+                            combineNodeCode($$, 2, $1, $3);
                             $$->type = $1->type;
                             if($1->subCoreName){
-                                printf("*%s := %s\n", $1->subCoreName, $3->coreName);
-                                printf("%s := *%s\n", $1->coreName, $1->subCoreName);
+                                //printf("*%s := %s\n", $1->subCoreName, $3->coreName);
+                                //printf("%s := *%s\n", $1->coreName, $1->subCoreName);
+                                char* s1 = (char*)malloc(sizeof(char)*100);
+                                char* s2 = (char*)malloc(sizeof(char)*100);
+                                sprintf(s1, "*%s := %s\n", $1->subCoreName, $3->coreName);
+                                sprintf(s2, "%s := *%s\n", $1->coreName, $1->subCoreName);
+                                combineCode($$, 2, getCodeblock(1, s1), getCodeblock(1, s2));
                             }else{
-                                _AEqualB_($1->coreName, $3->coreName);
+                                //_AEqualB_($1->coreName, $3->coreName);
+                                addCode($$, getCodeblock(1, s_AEqualB_($1->coreName, $3->coreName)));
                             }
                             $$->coreName = $1->coreName;
                         }
@@ -318,6 +327,7 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     _expOption_($$, $1, $2, $3);
                     }
 | LP Exp RP      {$$ = own3Child("Exp", $1, $2, $3);
+                    copyCode($$, $2);
                     $$->type = $2->type;
                     $$->coreName = $2->coreName;}
 | MINUS Exp    %prec RMINUS  {$$ = own2Child("Exp", $1, $2);
@@ -326,12 +336,14 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                                 }else{
                                     $$->type = $2->type;
                                 }
+                                copyCode($$, $2);
                                 char* t;
                                 _getNewTemp(&t);
                                 $$->coreName = t;
                                 char tt[20];
                                 sprintf(tt, "- %s", $2->coreName);
-                                _AEqualB_(t, tt);
+                                //_AEqualB_(t, tt);
+                                addCode($$, getCodeblock(1, s_AEqualB_(t, tt)));
                             }
 | NOT Exp     {$$ = own2Child("Exp", $1, $2);
                     if($2->type != 1){
@@ -341,10 +353,14 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     }}
 | ID LP Args RP  {$$ = own4Child("Exp", $1, $2, $3, $4);
                     if(!strcmp($1->sval, "write")){
-                        printf("WRITE %s\n", $3->coreName);
+                        //printf("WRITE %s\n", $3->coreName);
+                        char* s1 = (char*)malloc(sizeof(char)*100);
+                        sprintf(s1, "WRITE %s\n", $3->coreName);
+                        addCode($$, getCodeblock(1, s1));
                         $$->coreName = "#0";
                         $$->type = 1;
                     }else{
+                        copyCode($$, $3);
                         _callFunc_($$, $1, $3); 
                     }
                 }
@@ -352,7 +368,10 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     if(!strcmp("read", $1->sval)){
                         char* t;
                         _getNewTemp(&t);
-                        printf("READ %s\n", t);
+                        char* s1 = (char*)malloc(sizeof(char)*100);
+                        //printf("READ %s\n", t);
+                        sprintf(s1, "READ %s\n", t);
+                        addCode($$, getCodeblock(1, s1));
                         $$->coreName = t;
                         $$->type = 1;
                     }else{
@@ -371,17 +390,16 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         _getNewTemp(&t1);
                         _getNewTemp(&t2);                        
                         _getNewTemp(&t3);
-                        copyCode($$, $1);
-                        copyCode($$, $3);
                         char* s1 = (char*)malloc(sizeof(char)*100);     
                         char* s2 = (char*)malloc(sizeof(char)*100);     
                         char* s3 = (char*)malloc(sizeof(char)*100);     
                         sprintf(s1, "%s := %s * 4\n", t1, $3->coreName);
                         sprintf(s2, "%s := %s + %s\n", t2, $1->coreName, t1);
                         sprintf(s3, "%s := *%s\n", t3, t2);
-                        printf("%s := %s * 4\n", t1, $3->coreName);
-                        printf("%s := %s + %s\n", t2, $1->coreName, t1);
-                        printf("%s := *%s\n", t3, t2);
+                        // printf("%s := %s * 4\n", t1, $3->coreName);
+                        // printf("%s := %s + %s\n", t2, $1->coreName, t1);
+                        // printf("%s := *%s\n", t3, t2);
+                        combineNodeCode($$, 2, $1, $3);
                         combineCode($$, 3, getCodeblock(1, s1), getCodeblock(1, s2), getCodeblock(1, s3));
                         $$->coreName = t3;
                         $$->subCoreName = t2;
@@ -389,7 +407,6 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         $$->type = 5;
                         $$->arrDim = ($1->arrDim)-1;
                         $$->subType = $1->subType;
-
                     }
                     }
 | Exp DOT ID   {$$ = own3Child("Exp", $1, $2, $3);
@@ -454,7 +471,11 @@ Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
                     $$->parmList = arg;
                     $$->coreName = $1->coreName;
                     if(!SPECIALFUNC){
-                       printf("ARG %s\n", $1->coreName); 
+                       //printf("ARG %s\n", $1->coreName); 
+                       combineNodeCode($$, 2, $1, $3);
+                       char* s = (char*)malloc(sizeof(char)*100);
+                       sprintf(s, "ARG %s\n", $1->coreName); 
+                       addCode($$, getCodeblock(1, s));
                     }
                     }
 | Exp   {$$ = own1Child("Args", $1);
@@ -465,11 +486,11 @@ Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
         $$->parmList = arg;
         $$->coreName = $1->coreName;
         if(!SPECIALFUNC){
-            printf("ARG %s\n", $1->coreName);
-            // char* s = (char*)malloc(sizeof(char)*100);
-            // sprintf(s, "ARG %s\n", $1->coreName);
-            // addCode($1, getCodeblock(1, s));
-            // copyCode($$, $1);
+            //printf("ARG %s\n", $1->coreName);
+            copyCode($$, $1);
+            char* s = (char*)malloc(sizeof(char)*100);
+            sprintf(s, "ARG %s\n", $1->coreName);
+            addCode($1, getCodeblock(1, s));
         }
         }
 ;

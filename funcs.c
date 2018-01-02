@@ -69,15 +69,17 @@ void addCode(Node* target, CodeBlock* code){
 
 //将source的代码拷贝到target的后面
 void copyCode(Node* target, Node* source){
-    CodeBlock* firstCode = source->codeHead;
-    CodeBlock* curCode = source->codeTail;
-    if(target->codeHead == NULL && target->codeTail == NULL){
-        target->codeHead = firstCode;
-        target->codeTail = curCode;
-    }else{
-        curCode->next = target->codeTail->next;
-        target->codeTail->next = firstCode;
-        target->codeTail = curCode;
+    if(source->codeHead != NULL && source->codeTail !=NULL){
+        CodeBlock* firstCode = source->codeHead;
+        CodeBlock* curCode = source->codeTail;
+        if(target->codeHead == NULL && target->codeTail == NULL){
+            target->codeHead = firstCode;
+            target->codeTail = curCode;
+        }else{
+            curCode->next = target->codeTail->next;
+            target->codeTail->next = firstCode;
+            target->codeTail = curCode;
+        }
     }
 }
 
@@ -99,6 +101,13 @@ void printCode(Node* node){
 
 void _AEqualB_(char* a, char* b){
     printf("%s := %s\n", a, b);
+}
+
+char*  s_AEqualB_(char* a, char* b){
+    char* s1 = (char*)malloc(sizeof(char)*100);
+    //printf("%s := %s\n", a, b);
+    sprintf(s1, "%s := %s\n", a, b);
+    return s1;
 }
 
 void _putLabel_(char* l){
@@ -180,7 +189,8 @@ void _callFunc_(Node* ss, Node* s1, Node* s3){
             ss->coreName = t;
             char tt[20];
             sprintf(tt, "CALL %s", s1->sval);
-            _AEqualB_(t, tt);
+            //_AEqualB_(t, tt);
+            addCode(ss, getCodeblock(1, s_AEqualB_(t, tt)));
         }
         
         
@@ -193,12 +203,14 @@ void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3){
     }else{
         ss->type = s1->type;
     }
+    combineNodeCode(ss, 2, s1, s3);
     char* t;
     _getNewTemp(&t);
     ss->coreName = t;
     char tt[20];
     sprintf(tt, "%s %s %s", s1->coreName, s2->sval, s3->coreName);
-    _AEqualB_(t, tt);
+    //_AEqualB_(t, tt);
+    addCode(ss, getCodeblock(1, s_AEqualB_(t, tt)));
 }
 
 void _decFunc_(Node * ID){
@@ -243,6 +255,7 @@ void _arrDefOperation_(Node* ss, Node* s1, Node*s2){
     //让VarDec包含ID的类型和值
     ss->type = s1->type;
     ss->sval = s1->sval;
+    ss->coreName = s1->coreName;
     if(addVarRec(s1) == 0){
         if(ISDefSt){
             myerror(5, "结构体中域名重复定义");
@@ -251,7 +264,10 @@ void _arrDefOperation_(Node* ss, Node* s1, Node*s2){
         }
     }
     if(s1->type == 5){
-        printf("DEC %s %d\n", s1->coreName, s2->subType*4);
+        char* s = (char*)malloc(sizeof(char)*100);
+        //printf("DEC %s %d\n", s1->coreName, s2->subType*4);
+        sprintf(s, "DEC %s %d\n", s1->coreName, s2->subType*4);
+        addCode(ss, getCodeblock(1, s));
     }
 }
 

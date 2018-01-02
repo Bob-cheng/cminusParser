@@ -142,8 +142,11 @@ void funcDefOption(Node* ss, Node* s1, Node* s2, Node* s3);
 
 CodeBlock* getCodeblock(int level, ...);
 void combineCode(Node* target, int num, ...);
+void combineNodeCode(Node* target, int num, ...);
 void addCode(Node* target, CodeBlock* code);
 void copyCode(Node* target, Node* source);
+char*  s_AEqualB_(char* a, char* b);
+void printCode(Node* node);
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);
@@ -152,9 +155,9 @@ void _decFunc_(Node * ID);
 void _getNewLabel(char** out);
 void _AEqualB_(char* a, char* b);
 char* _insNumFmt(char* in);
-void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3);
-void _callFunc_(Node* ss, Node* s1, Node* s3);
-void _arrDefOperation_(Node* ss, Node* s1, Node*s2);
+     void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3);
+     void _callFunc_(Node* ss, Node* s1, Node* s3);
+     void _arrDefOperation_(Node* ss, Node* s1, Node*s2);
 void _pushTfStack();
 void _popTfStack();
 void _pushSNextStack();
