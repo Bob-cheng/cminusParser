@@ -206,8 +206,11 @@ PREWS:                  {
 Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2); 
                         //不应该在这里输出，只是测试用
                         //printCode($1);
+                        copyCode($$, $1);
                         }
-| CompSt                {$$ = own1Child("Stmt", $1);}
+| CompSt                {$$ = own1Child("Stmt", $1);
+                            copyCode($$, $1);
+                        }
 | RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);
                             //添加返回链表
                             FUNCRt* newNode = (FUNCRt*)malloc(sizeof(FUNCRt));
@@ -215,7 +218,12 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);
                             newNode->type = $2->type;
                             newNode->next = FUNCRtType;
                             FUNCRtType = newNode;
-                            printf("RETURN %s\n", $2->coreName);
+
+                            copyCode($$, $2);
+                            char* s1 = (char*)malloc(sizeof(char)*100);
+                            //printf("RETURN %s\n", $2->coreName);
+                            sprintf(s1, "RETURN %s\n", $2->coreName);
+                            addCode($$, getCodeblock(1, s1));
                          }
 | IF LP Exp RP AFTIF NEWStmt    %prec AFTER_ELSE {
                                     $$ = own5Child("Stmt", $1, $2, $3, $4, $6);}    
@@ -302,7 +310,7 @@ VarDec_x:              {$$ = own0Child("VarDec_x");
 ;
 
 
-
+//codeOK
 Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         if($1->type != $3->type){
                             myerror(5, "赋值号两边的表达式类型不匹配。");
@@ -331,7 +339,8 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                             $$->coreName = $1->coreName;
                         }
                         }
-| Exp AND Exp  {$$ = own3Child("Exp", $1, $2, $3);
+| Exp AND Exp  {    
+                    $$ = own3Child("Exp", $1, $2, $3);
                     if($1->type != $3->type || $1->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
@@ -352,23 +361,29 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         _putGoto_(EXPFalse);
                         $$->type = 1;
                     }}
-| Exp PLUS Exp   {$$ = own3Child("Exp", $1, $2, $3);
+| Exp PLUS Exp   {  //codeOK
+                    $$ = own3Child("Exp", $1, $2, $3);
                     _expOption_($$, $1, $2, $3);
                     }
-| Exp MINUS Exp  {$$ = own3Child("Exp", $1, $2, $3);
+| Exp MINUS Exp  {  //codeOK
+                    $$ = own3Child("Exp", $1, $2, $3);
                     _expOption_($$, $1, $2, $3);
                     }
-| Exp STAR Exp   {$$ = own3Child("Exp", $1, $2, $3);
+| Exp STAR Exp   {  //codeOK
+                    $$ = own3Child("Exp", $1, $2, $3);
                     _expOption_($$, $1, $2, $3);
                     }
-| Exp DIV Exp    {$$ = own3Child("Exp", $1, $2, $3);
+| Exp DIV Exp    {  //codeOK
+                    $$ = own3Child("Exp", $1, $2, $3);
                     _expOption_($$, $1, $2, $3);
                     }
-| LP Exp RP      {$$ = own3Child("Exp", $1, $2, $3);
+| LP Exp RP      {  //codeOK
+                    $$ = own3Child("Exp", $1, $2, $3);
                     copyCode($$, $2);
                     $$->type = $2->type;
                     $$->coreName = $2->coreName;}
-| MINUS Exp    %prec RMINUS  {$$ = own2Child("Exp", $1, $2);
+| MINUS Exp    %prec RMINUS  {  //codeOK
+                                $$ = own2Child("Exp", $1, $2);
                                 if($2->type != 1 && $2->type != 2){
                                     myerror(-2, "仅有int型和float型变量才能参与算术运算。");
                                 }else{
@@ -389,7 +404,8 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     }else{
                         $$->type = 1;
                     }}
-| ID LP Args RP  {$$ = own4Child("Exp", $1, $2, $3, $4);
+| ID LP Args RP  {  //codeOK
+                    $$ = own4Child("Exp", $1, $2, $3, $4);
                     if(!strcmp($1->sval, "write")){
                         //printf("WRITE %s\n", $3->coreName);
                         char* s1 = (char*)malloc(sizeof(char)*100);
@@ -402,7 +418,8 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         _callFunc_($$, $1, $3); 
                     }
                 }
-| ID LP RP       {$$ = own3Child("Exp", $1, $2, $3);
+| ID LP RP       {  //codeOK
+                    $$ = own3Child("Exp", $1, $2, $3);
                     if(!strcmp("read", $1->sval)){
                         char* t;
                         _getNewTemp(&t);
@@ -416,7 +433,8 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         _callFunc_($$, $1, NULL);
                     }
                 }
-| Exp LB Exp RB  {$$ = own4Child("Exp", $1, $2, $3, $4);
+| Exp LB Exp RB  {  //codeOK
+                    $$ = own4Child("Exp", $1, $2, $3, $4);
                     if($1->type != 5){
                         myerror(10, "对非数组型变量使用“[…]”（数组访问）操作符。");
                     }else if($3->type != 1){
@@ -500,7 +518,8 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
         // $$->coreName = t;
         }
 ;
-Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
+Args: Exp COMMA Args  {  //codeOK
+                    $$ = own3Child("Args", $1, $2, $3);
                     $$->parmCnt = ($3->parmCnt)+1;
                     VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
                     arg->name=NULL;
@@ -516,7 +535,8 @@ Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
                        addCode($$, getCodeblock(1, s));
                     }
                     }
-| Exp   {$$ = own1Child("Args", $1);
+| Exp   {  //codeOK
+        $$ = own1Child("Args", $1);
         $$->parmCnt = 1;
         VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
         arg->name=NULL;
