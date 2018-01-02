@@ -21,7 +21,7 @@ extern int iserror;
 
 %type<node> Program ExtDefList ExtDef ExtDecList Specifier
 %type<node> StructSpecifier OptTag Tag VarDec VarDec_x FunDec VarList ParamDec
-%type<node> CompSt StmtList Stmt DefList Dec Exp Args Def DecList NEWStmt 
+%type<node> CompSt StmtList Stmt DefList Dec Exp Args Def DecList  PStmt
 
 %nonassoc	AFTER_ELSE
 %nonassoc	ELSE
@@ -50,7 +50,7 @@ ExtDef: Specifier ExtDecList SEMI   {$$ = own3Child("ExtDef", $1, $2, $3);}
 | Specifier  FunDec CompSt   {$$ = own3Child("ExtDef", $1, $2, $3);
                                 funcDefOption($$, $1, $2, $3);
                                 //这里还没写完，暂时不用输出
-                                //printCode($3);
+                                printCode($3);
                                 }
                                 
 | error SEMI                {$$ = own0Child("ExtDef");}
@@ -170,34 +170,58 @@ CompSt: LC DefList StmtList RC  {$$ = own4Child("CompSt", $1, $2, $3, $4);
                                     p = p->next;
                                 }
                                 DEFCodeList = NULL;
-
+                                //将递归起来的StmtList代码传递给Compst
+                                Node* q = PStmtCodeList;
+                                while(q){
+                                    copyCode($$, q);
+                                    q = q->next;
+                                }
+                                PStmtCodeList = NULL;
                                 }
 | error RC              {$$ = own0Child("CompSt");}
 ;
-StmtList:               {$$ = own0Child("StmtList");}
-| NEWStmt StmtList         {$$ = own2Child("StmtList", $1, $2);}
+StmtList:               {$$ = own0Child("StmtList");
+                        PStmtCodeList = NULL;
+                        }
+| PStmt StmtList         {$$ = own2Child("StmtList", $1, $2);
+                        addToPStmtCodeList($1);
+                        }
 ;
 
-PRES:                   {   _pushSNextStack();                    
-                            char* l;
-                            _getNewLabel(&l); 
-                            STMTNext = l;
+// PRES:                   {   _pushSNextStack();                    
+//                             char* l;
+//                             _getNewLabel(&l); 
+//                             STMTNext = l;
                             
-                        }
+//                         }
+// ;
+
+// NEWStmt: PRES Stmt      {
+//                             $$ = own1Child("NEWStmt", $2);
+//                             //_putLabel_(STMTNext);
+//                             _popSNextStack();
+//                         }
+// ; 
+
+PStmt: Stmt                {  
+                              $$ = own1Child("PStmt", $1);
+                              char* l;
+                              _getNewLabel(&l);
+                              if($1->sNextL == NULL){
+                                  debug();
+                              }
+                              strcpy($1->sNextL, l);
+                              //$1->sNextL = l;
+                              copyCode($$, $1);
+                              copyCode($$, n_putLabel_(&($1->sNextL)));
+                          }
 ;
 
-NEWStmt: PRES Stmt      {
-                            $$ = own1Child("NEWStmt", $2);
-                            //_putLabel_(STMTNext);
-                            _popSNextStack();
-                        }
-; 
-
-AFTIF:                  {
-                            _putLabel_(EXPTrue);
+// AFTIF:                  {
+//                             _putLabel_(EXPTrue);
                             
-                        }
-;
+//                         }
+// ;
 PREWS:                  {
                             _putLabel_(EXPTrue);
                         }
@@ -225,14 +249,28 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);
                             sprintf(s1, "RETURN %s\n", $2->coreName);
                             addCode($$, getCodeblock(1, s1));
                          }
-| IF LP Exp RP AFTIF NEWStmt    %prec AFTER_ELSE {
-                                    $$ = own5Child("Stmt", $1, $2, $3, $4, $6);}    
-| IF LP Exp RP AFTIF NEWStmt ELSE NEWStmt  {
-                            
-                            $$ = own7Child("Stmt", $1, $2, $3, $4, $6, $7, $8);
-                            _popTfStack();
+| IF LP Exp RP  Stmt    %prec AFTER_ELSE {
+                                    $$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
+| IF LP Exp RP  Stmt ELSE Stmt  {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);
+                                char* l1, *l2;
+                                _getNewLabel(&l1);
+                                _getNewLabel(&l2);
+                                //$3->trueL = l1;
+                                strcpy($3->trueL, l1);
+                                //$3->falseL = l2;
+                                strcpy($3->falseL, l2);
+                                $5->sNextL = $$->sNextL;
+                                $7->sNextL = $$->sNextL;
+                                copyCode($$, $3); //B.code
+                                copyCode($$, n_putLabel_(&($3->trueL)));
+                                //addCode($$, getCodeblock(2,&($3->trueL)));
+                                copyCode($$, $5);//S1.code
+                                copyCode($$, n_putGoto_(&($$->sNextL)));
+                                copyCode($$, n_putLabel_(&($3->falseL)));
+                                copyCode($$, $7);//S2.code
+                            //_popTfStack();
                             }
-| WHILE LP Exp RP  PREWS NEWStmt {
+| WHILE LP Exp RP  PREWS Stmt {
                                 $$ = own5Child("Stmt", $1, $2, $3, $4, $6);
                                 _putGoto_(STMTNext);
                                 _popSNextStack();
@@ -357,9 +395,15 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
                     }else{
                         //$$->type = $1->type;
-                        printf("IF %s %s %s GOTO %s\n", $1->coreName, $2->sval, $3->coreName, EXPTrue);
-                        _putGoto_(EXPFalse);
+                        //printf("IF %s %s %s GOTO %s\n", $1->coreName, $2->sval, $3->coreName, EXPTrue);
+                        //_putGoto_(EXPFalse);
                         $$->type = 1;
+                        combineNodeCode($$, 2, $1, $3);
+                        char* s1 = (char*)malloc(sizeof(char)*100);
+                        sprintf(s1, "IF %s %s %s GOTO ", $1->coreName, $2->sval, $3->coreName);
+                        combineCode($$,3 , getCodeblock(1, s1), getCodeblock(2, &($$->trueL)), getCodeblock(1, "\n"));
+                        copyCode($$, n_putGoto_(&($$->falseL)));
+
                     }}
 | Exp PLUS Exp   {  //codeOK
                     $$ = own3Child("Exp", $1, $2, $3);

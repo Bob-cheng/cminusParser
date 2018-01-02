@@ -19,6 +19,13 @@ void addToDEFCodeList(Node* node){
     }
 }
 
+void addToPStmtCodeList(Node* node){
+    if(node->codeHead != NULL && node->codeTail != NULL){
+        node->next = PStmtCodeList;
+        PStmtCodeList = node;
+    }
+}
+
 //level表示创建的类型，1->一级指针， 2->二级指针
 CodeBlock* getCodeblock(int level, ...){
     CodeBlock* newBlock = (CodeBlock*)malloc(sizeof(CodeBlock));
@@ -133,6 +140,23 @@ void _putLabel_(char* l){
 void _putGoto_(char* l){
     printf("GOTO %s\n", l);
 }
+
+Node* n_putLabel_(char** l){
+    //printf("LABEL %s :\n", l);
+    Node* outCode = (Node*)malloc(sizeof(Node));
+    combineCode(outCode, 3, getCodeblock(1, "LABEL "),
+                 getCodeblock(2, l), getCodeblock(1, " :\n"));
+    return outCode;
+}
+
+Node* n_putGoto_(char** l){
+    //printf("GOTO %s\n", l);
+    Node* outCode = (Node*)malloc(sizeof(Node));
+    combineCode(outCode, 3, getCodeblock(1, "GOTO "),
+                 getCodeblock(2, l), getCodeblock(1, "\n"));
+    return outCode;
+}
+
 void _pushTfStack(){
     int top = ++tfStack.top;
     tfStack.stack[top][0] = EXPTrue;
@@ -620,6 +644,9 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     Nptr->lineNo = lineno;
     Nptr->chCount = 0;
     Nptr->sval = str;
+    Nptr->trueL = (char*)malloc(sizeof(char)*100);
+    Nptr->falseL = (char*)malloc(sizeof(char)*100);
+    Nptr->sNextL = (char*)malloc(sizeof(char)*100);
     if(!strcmp(tkName, "FLOAT")){
         //Nptr->type = "float";
         if(strchr(str, 'e') != NULL){
@@ -657,6 +684,9 @@ Node* ownManyChild(char* tkName, int count, Node* ch0, Node* ch1,
     Nptr->tkName = tkName;
     Nptr->lineNo = count==0?-1:ch0->lineNo;
     Nptr->chCount = count;
+    Nptr->trueL = (char*)malloc(sizeof(char)*100);
+    Nptr->falseL = (char*)malloc(sizeof(char)*100);
+    Nptr->sNextL = (char*)malloc(sizeof(char)*100);
     Nptr->children[0] = ch0;
     Nptr->children[1] = ch1;
     Nptr->children[2] = ch2;
@@ -738,6 +768,7 @@ void initiate(){
     FUNCRtType=NULL;
     DEFCodeList = NULL; 
     DECCodeList = NULL;
+    PStmtCodeList = NULL; 
     LABELnum = 0;
     VARnum = 0;
     TEMPnum = 0;

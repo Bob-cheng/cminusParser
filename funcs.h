@@ -86,6 +86,7 @@ typedef struct Node
 
 Node* DECCodeList;
 Node* DEFCodeList;
+Node* PStmtCodeList;
 
 typedef struct FuncRec
 {
@@ -154,6 +155,9 @@ char*  s_AEqualB_(char* a, char* b);
 void printCode(Node* node);
 void addToDECCodeList(Node* node);
 void addToDEFCodeList(Node* node);
+void addToPStmtCodeList(Node* node);
+Node* n_putLabel_(char** l);
+Node* n_putGoto_(char** l);
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);

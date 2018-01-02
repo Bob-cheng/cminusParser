@@ -134,18 +134,18 @@ ws              [ \t]+
     
     Node* np = getStrNode(yytext,yylineno, "IF", yyleng);
     yylval.node = np;
-    _pushTfStack();
-    char* l1, *l2;
-    _getNewLabel(&l1);
-    _getNewLabel(&l2);
-    EXPTrue = l1;
-    EXPFalse = l2;
+    // _pushTfStack();
+    // char* l1, *l2;
+    // _getNewLabel(&l1);
+    // _getNewLabel(&l2);
+    // EXPTrue = l1;
+    // EXPFalse = l2;
     return IF;}
 "else"          {
     Node* np = getStrNode(yytext,yylineno, "ELSE", yyleng);
     yylval.node = np;
-    _putGoto_(STMTNext);
-    _putLabel_(EXPFalse);
+    // _putGoto_(STMTNext);
+    // _putLabel_(EXPFalse);
     return ELSE;}
 "while"         {
     Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
