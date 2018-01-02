@@ -370,10 +370,19 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         char* t1, *t2, *t3;
                         _getNewTemp(&t1);
                         _getNewTemp(&t2);                        
-                        _getNewTemp(&t3);                        
+                        _getNewTemp(&t3);
+                        copyCode($$, $1);
+                        copyCode($$, $3);
+                        char* s1 = (char*)malloc(sizeof(char)*100);     
+                        char* s2 = (char*)malloc(sizeof(char)*100);     
+                        char* s3 = (char*)malloc(sizeof(char)*100);     
+                        sprintf(s1, "%s := %s * 4\n", t1, $3->coreName);
+                        sprintf(s2, "%s := %s + %s\n", t2, $1->coreName, t1);
+                        sprintf(s3, "%s := *%s\n", t3, t2);
                         printf("%s := %s * 4\n", t1, $3->coreName);
                         printf("%s := %s + %s\n", t2, $1->coreName, t1);
                         printf("%s := *%s\n", t3, t2);
+                        combineCode($$, 3, getCodeblock(1, s1), getCodeblock(1, s2), getCodeblock(1, s3));
                         $$->coreName = t3;
                         $$->subCoreName = t2;
                     }else{
@@ -457,6 +466,10 @@ Args: Exp COMMA Args  {$$ = own3Child("Args", $1, $2, $3);
         $$->coreName = $1->coreName;
         if(!SPECIALFUNC){
             printf("ARG %s\n", $1->coreName);
+            // char* s = (char*)malloc(sizeof(char)*100);
+            // sprintf(s, "ARG %s\n", $1->coreName);
+            // addCode($1, getCodeblock(1, s));
+            // copyCode($$, $1);
         }
         }
 ;

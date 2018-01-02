@@ -1,5 +1,6 @@
 #ifndef HEAD
 #define  HEAD
+
 int IDType; //记录当前的ID类型的全局变量
 int ISDefSt; // 表示是否是在定义结构体
 int VARnum; //中间代码生成的变量标识
@@ -8,6 +9,15 @@ int LABELnum;//中间代码生成的标签标识
 int SPECIALFUNC;//判断是否是特殊函数的标签
 int TESTFunStage;
 int FUNCRtTypeINT;
+
+typedef struct CodeBlock{
+    int level; //表示指针的级数，1表示一级指针，2表示二级指针
+    char* pCode;
+    char** ppCode;
+    struct CodeBlock *next;
+}CodeBlock;
+
+
 
 
 typedef struct TFStack{
@@ -65,7 +75,11 @@ typedef struct Node
     char* coreName;//中间代码生成的名字
     char* subCoreName;//对于数组来说需要储存两个名字,这个表示的是地址
     //char* type;// 常数的类型 tkName=='FLOAT'或'INT'有效，例如 1->int  1.0->float 
-
+    char* trueL;  //用于表达式的真出口标签
+    char* falseL; //用于表达式的假出口标签
+    char* sNextL;  //用于stmt的结束出口标签
+    CodeBlock* codeHead; //用于指向代码链的头部
+    CodeBlock* codeTail; //用于指向代码链的尾部
 } Node;
 
 typedef struct FuncRec
@@ -126,6 +140,10 @@ void outPutLinks(VarRec* link);
 void initiate();
 void funcDefOption(Node* ss, Node* s1, Node* s2, Node* s3);
 
+CodeBlock* getCodeblock(int level, ...);
+void combineCode(Node* target, int num, ...);
+void addCode(Node* target, CodeBlock* code);
+void copyCode(Node* target, Node* source);
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);

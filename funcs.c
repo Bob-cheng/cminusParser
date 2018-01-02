@@ -2,7 +2,100 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <stdarg.h>
 #include "funcs.h"
+
+//level表示创建的类型，1->一级指针， 2->二级指针
+CodeBlock* getCodeblock(int level, ...){
+    CodeBlock* newBlock = (CodeBlock*)malloc(sizeof(CodeBlock));
+    newBlock->level=level;
+    va_list pArgs;
+    va_start(pArgs, level);
+    if(level == 1){
+        char* str = va_arg(pArgs, char*);
+        newBlock->pCode = str;
+    }else if (level == 2){
+        char** pstr = va_arg(pArgs, char**);
+        newBlock->ppCode = pstr;
+    }else{
+        printf("build code block error\n");
+    }
+    va_end(pArgs);
+    return newBlock;
+}
+
+void combineNodeCode(Node* target, int num, ...){
+    va_list pArgs;
+    va_start(pArgs, num);
+    if(num > 0){
+        while (num){
+            Node* curNode = va_arg(pArgs, Node*);
+            num--;
+            copyCode(target, curNode);
+        }
+    }
+    va_end(pArgs);
+}
+
+//将num个codeBlock合并起来添加到targetNode对应代码的后面
+void combineCode(Node* target, int num, ...){
+    va_list pArgs;
+    va_start(pArgs, num);
+    if(num >= 1){
+        CodeBlock* curCode = va_arg(pArgs, CodeBlock*);
+        CodeBlock* firstCode = curCode;
+        num--;
+        while (num){
+            CodeBlock* newCode = va_arg(pArgs, CodeBlock*);
+            num--;
+            curCode->next = newCode;
+            curCode = curCode->next;
+        }
+        if(target->codeHead == NULL && target->codeTail == NULL){
+            target->codeHead = firstCode;
+            target->codeTail = curCode;
+        }else{
+            curCode->next = target->codeTail->next;
+            target->codeTail->next = firstCode;
+            target->codeTail = curCode;
+        }
+    }
+    va_end(pArgs);
+}
+
+void addCode(Node* target, CodeBlock* code){
+    combineCode(target, 1, code);
+}
+
+//将source的代码拷贝到target的后面
+void copyCode(Node* target, Node* source){
+    CodeBlock* firstCode = source->codeHead;
+    CodeBlock* curCode = source->codeTail;
+    if(target->codeHead == NULL && target->codeTail == NULL){
+        target->codeHead = firstCode;
+        target->codeTail = curCode;
+    }else{
+        curCode->next = target->codeTail->next;
+        target->codeTail->next = firstCode;
+        target->codeTail = curCode;
+    }
+}
+
+void printCode(Node* node){
+    CodeBlock* p = node->codeHead;
+    while (p){
+        char* code = (p->level==1) ? p->pCode : (*(p->ppCode));
+        printf("%s", code);
+        if(p == node->codeTail){
+            break;
+        }else{
+            p = p->next;
+        }
+    }
+}
+
+
+
 
 void _AEqualB_(char* a, char* b){
     printf("%s := %s\n", a, b);
@@ -641,6 +734,18 @@ void initiate(){
     sNextStack.top=-1;
     STMTNext =NULL;
 
+    // char* a = "123\n", *b = "666\n";
+    // Node* testNode = (Node*)malloc(sizeof(Node));
+    // Node* testNode2 = (Node*)malloc(sizeof(Node));
+    // Node* testNode3 = (Node*)malloc(sizeof(Node));
+    // combineCode(testNode, 3, getCodeblock(1, "555\n"), getCodeblock(1, "777\n"), getCodeblock(2, &b));
+    // addCode(testNode2, getCodeblock(1, "123123123\n"));
+    // addCode(testNode2, getCodeblock(2, &a));
+    // addCode(testNode3, getCodeblock(1, "123123123\n"));
+    // combineNodeCode(testNode, 2, testNode2, testNode3);
+    // a = "456\n";
+    // printCode(testNode);
+    
 
 }
 

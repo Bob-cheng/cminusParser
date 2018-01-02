@@ -490,7 +490,7 @@ static const yytype_uint16 yyrline[] =
      184,   189,   190,   191,   200,   202,   207,   213,   216,   217,
      219,   220,   222,   223,   225,   234,   249,   253,   257,   266,
      287,   293,   299,   308,   311,   314,   317,   320,   323,   336,
-     342,   351,   362,   386,   406,   424,   431,   439,   451
+     342,   351,   362,   395,   415,   433,   440,   448,   460
 };
 #endif
 
@@ -2044,10 +2044,19 @@ yyreduce:
                         char* t1, *t2, *t3;
                         _getNewTemp(&t1);
                         _getNewTemp(&t2);                        
-                        _getNewTemp(&t3);                        
+                        _getNewTemp(&t3);
+                        copyCode((yyval.node), (yyvsp[-3].node));
+                        copyCode((yyval.node), (yyvsp[-1].node));
+                        char* s1 = (char*)malloc(sizeof(char)*100);     
+                        char* s2 = (char*)malloc(sizeof(char)*100);     
+                        char* s3 = (char*)malloc(sizeof(char)*100);     
+                        sprintf(s1, "%s := %s * 4\n", t1, (yyvsp[-1].node)->coreName);
+                        sprintf(s2, "%s := %s + %s\n", t2, (yyvsp[-3].node)->coreName, t1);
+                        sprintf(s3, "%s := *%s\n", t3, t2);
                         printf("%s := %s * 4\n", t1, (yyvsp[-1].node)->coreName);
                         printf("%s := %s + %s\n", t2, (yyvsp[-3].node)->coreName, t1);
                         printf("%s := *%s\n", t3, t2);
+                        combineCode((yyval.node), 3, getCodeblock(1, s1), getCodeblock(1, s2), getCodeblock(1, s3));
                         (yyval.node)->coreName = t3;
                         (yyval.node)->subCoreName = t2;
                     }else{
@@ -2057,11 +2066,11 @@ yyreduce:
 
                     }
                     }
-#line 2061 "parser.c" /* yacc.c:1646  */
+#line 2070 "parser.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 386 "parser.y" /* yacc.c:1646  */
+#line 395 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                 if((yyvsp[-2].node)->type != 3){
                     myerror(13, "对非结构体型变量使用“.”操作符。");
@@ -2082,11 +2091,11 @@ yyreduce:
                     }
                 }
                 }
-#line 2086 "parser.c" /* yacc.c:1646  */
+#line 2095 "parser.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 406 "parser.y" /* yacc.c:1646  */
+#line 415 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Exp", (yyvsp[0].node)); 
         VarRec* rcd = checkVarRec((yyvsp[0].node));
         if(rcd == NULL){
@@ -2105,11 +2114,11 @@ yyreduce:
         }
         
         }
-#line 2109 "parser.c" /* yacc.c:1646  */
+#line 2118 "parser.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 424 "parser.y" /* yacc.c:1646  */
+#line 433 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Exp", (yyvsp[0].node)); (yyval.node)->type = 1; (yyval.node)->subType = -1;
         (yyval.node)->coreName = _insNumFmt((yyvsp[0].node)->sval);
         // char* t;
@@ -2117,11 +2126,11 @@ yyreduce:
         // _AEqualB_(t, _insNumFmt($1->sval));
         // $$->coreName = t;
 }
-#line 2121 "parser.c" /* yacc.c:1646  */
+#line 2130 "parser.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 431 "parser.y" /* yacc.c:1646  */
+#line 440 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Exp", (yyvsp[0].node)); (yyval.node)->type = 2; (yyval.node)->subType = -1;
         (yyval.node)->coreName = _insNumFmt((yyvsp[0].node)->sval);
         // char* t;
@@ -2129,11 +2138,11 @@ yyreduce:
         // _AEqualB_(t, _insNumFmt($1->sval));
         // $$->coreName = t;
         }
-#line 2133 "parser.c" /* yacc.c:1646  */
+#line 2142 "parser.c" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 439 "parser.y" /* yacc.c:1646  */
+#line 448 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Args", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     (yyval.node)->parmCnt = ((yyvsp[0].node)->parmCnt)+1;
                     VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
@@ -2146,11 +2155,11 @@ yyreduce:
                        printf("ARG %s\n", (yyvsp[-2].node)->coreName); 
                     }
                     }
-#line 2150 "parser.c" /* yacc.c:1646  */
+#line 2159 "parser.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 451 "parser.y" /* yacc.c:1646  */
+#line 460 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Args", (yyvsp[0].node));
         (yyval.node)->parmCnt = 1;
         VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
@@ -2160,13 +2169,17 @@ yyreduce:
         (yyval.node)->coreName = (yyvsp[0].node)->coreName;
         if(!SPECIALFUNC){
             printf("ARG %s\n", (yyvsp[0].node)->coreName);
+            // char* s = (char*)malloc(sizeof(char)*100);
+            // sprintf(s, "ARG %s\n", $1->coreName);
+            // addCode($1, getCodeblock(1, s));
+            // copyCode($$, $1);
         }
         }
-#line 2166 "parser.c" /* yacc.c:1646  */
+#line 2179 "parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 2170 "parser.c" /* yacc.c:1646  */
+#line 2183 "parser.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2401,6 +2414,6 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 463 "parser.y" /* yacc.c:1906  */
+#line 476 "parser.y" /* yacc.c:1906  */
 
 
