@@ -215,27 +215,15 @@ PStmt: Stmt                {
                               copyCode($$, $1);
                               copyCode($$, n_putLabel_(&($1->sNextL)));
                           }
-;
-
-// AFTIF:                  {
-//                             _putLabel_(EXPTrue);
-                            
-//                         }
-// ;
-PREWS:                  {
-                            _putLabel_(EXPTrue);
-                        }
-;
-
-Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2); 
+| Exp SEMI          {$$ = own2Child("PStmt", $1, $2); 
                         //不应该在这里输出，只是测试用
                         //printCode($1);
                         copyCode($$, $1);
                         }
-| CompSt                {$$ = own1Child("Stmt", $1);
+| CompSt                {$$ = own1Child("PStmt", $1);
                             copyCode($$, $1);
                         }
-| RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);
+| RETURN Exp SEMI       {$$ = own3Child("PStmt", $1, $2, $3);
                             //添加返回链表
                             FUNCRt* newNode = (FUNCRt*)malloc(sizeof(FUNCRt));
                             newNode->line = $1->lineNo;
@@ -248,10 +236,23 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);
                             //printf("RETURN %s\n", $2->coreName);
                             sprintf(s1, "RETURN %s\n", $2->coreName);
                             addCode($$, getCodeblock(1, s1));
-                         }
-| IF LP Exp RP  Stmt    %prec AFTER_ELSE {
+                        }
+;
+
+// AFTIF:                  {
+//                             _putLabel_(EXPTrue);
+                            
+//                         }
+// ;
+PREWS:                  {
+                            _putLabel_(EXPTrue);
+                        }
+;
+
+
+Stmt:   IF LP Exp RP  PStmt    %prec AFTER_ELSE {
                                     $$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
-| IF LP Exp RP  Stmt ELSE Stmt  {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);
+| IF LP Exp RP  PStmt ELSE PStmt  {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);
                                 char* l1, *l2;
                                 _getNewLabel(&l1);
                                 _getNewLabel(&l2);
@@ -270,7 +271,7 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2);
                                 copyCode($$, $7);//S2.code
                             //_popTfStack();
                             }
-| WHILE LP Exp RP  PREWS Stmt {
+| WHILE LP Exp RP  PREWS PStmt {
                                 $$ = own5Child("Stmt", $1, $2, $3, $4, $6);
                                 _putGoto_(STMTNext);
                                 _popSNextStack();
@@ -458,7 +459,7 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         $$->coreName = "#0";
                         $$->type = 1;
                     }else{
-                        copyCode($$, $3);
+                        
                         _callFunc_($$, $1, $3); 
                     }
                 }
@@ -592,7 +593,7 @@ Args: Exp COMMA Args  {  //codeOK
             copyCode($$, $1);
             char* s = (char*)malloc(sizeof(char)*100);
             sprintf(s, "ARG %s\n", $1->coreName);
-            addCode($1, getCodeblock(1, s));
+            addCode($$, getCodeblock(1, s));
         }
         }
 ;

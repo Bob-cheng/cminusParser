@@ -230,6 +230,10 @@ void _callFunc_(Node* ss, Node* s1, Node* s3){
             char tt[20];
             sprintf(tt, "CALL %s", s1->sval);
             //_AEqualB_(t, tt);
+            if(s3->codeHead == NULL){
+                debug();
+            }
+            copyCode(ss, s3);
             addCode(ss, getCodeblock(1, s_AEqualB_(t, tt)));
         }
         
