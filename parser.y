@@ -49,6 +49,8 @@ ExtDef: Specifier ExtDecList SEMI   {$$ = own3Child("ExtDef", $1, $2, $3);}
 | Specifier SEMI            {$$ = own2Child("ExtDef", $1, $2);}
 | Specifier  FunDec CompSt   {$$ = own3Child("ExtDef", $1, $2, $3);
                                 funcDefOption($$, $1, $2, $3);
+                                //这里还没写完，暂时不用输出
+                                //printCode($3);
                                 }
                                 
 | error SEMI                {$$ = own0Child("ExtDef");}
@@ -83,7 +85,12 @@ StructSpecifier: STRUCT OptTag LC DefList RC  {//这个是结构体在定义
                                                     }
                                                 }
                                                 ISDefSt=0;
-                                                STDefList=NULL;}
+                                                STDefList=NULL;
+                                                
+                                                //作为debug用，其实不用输出。
+                                                //printCode(DEFCodeList);
+                                                DEFCodeList = NULL;
+                                                }
 | STRUCT Tag                { //这个是结构体在使用
                                 $$ = own2Child("StructSpecifier", $1, $2);
 
@@ -154,7 +161,17 @@ ParamDec: Specifier   VarDec  {$$ = own2Child("ParamDec", $1, $2);
                                 }
 ;
 
-CompSt: LC DefList StmtList RC  {$$ = own4Child("CompSt", $1, $2, $3, $4); STDefList=NULL;}
+CompSt: LC DefList StmtList RC  {$$ = own4Child("CompSt", $1, $2, $3, $4); 
+                                STDefList=NULL;
+                                //将递归起来的DefList代码传递给Compst
+                                Node* p = DEFCodeList;
+                                while(p){
+                                    copyCode($$, p);
+                                    p = p->next;
+                                }
+                                DEFCodeList = NULL;
+
+                                }
 | error RC              {$$ = own0Child("CompSt");}
 ;
 StmtList:               {$$ = own0Child("StmtList");}
@@ -186,7 +203,10 @@ PREWS:                  {
                         }
 ;
 
-Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2); printCode($1);}
+Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2); 
+                        //不应该在这里输出，只是测试用
+                        //printCode($1);
+                        }
 | CompSt                {$$ = own1Child("Stmt", $1);}
 | RETURN Exp SEMI       {$$ = own3Child("Stmt", $1, $2, $3);
                             //添加返回链表
@@ -213,24 +233,42 @@ Stmt: Exp SEMI          {$$ = own2Child("Stmt", $1, $2); printCode($1);}
 | error SEMI            {$$ = own0Child("Stmt"); }
 ;
 
-DefList:                {$$ = own0Child("DefList");}
-| Def DefList           {$$ = own2Child("DefList", $1, $2);}
+DefList:                {$$ = own0Child("DefList");
+                            DEFCodeList = NULL;
+                        }
+| Def DefList           {$$ = own2Child("DefList", $1, $2);
+                            addToDEFCodeList($1);
+                        }
 ;
-Def: Specifier  DecList SEMI {$$ = own3Child("Def", $1, $2, $3);}
+Def: Specifier  DecList SEMI {
+                            $$ = own3Child("Def", $1, $2, $3);
+                            Node* p = DECCodeList;
+                            while(p){
+                                copyCode($$, p);
+                                p = p->next;
+                            }
+                            DECCodeList = NULL;
+                            }
 | Specifier error SEMI  {$$ = own0Child("Def"); }
 ;
-DecList: Dec            {$$ = own1Child("DecList", $1);}
-|  Dec COMMA  DecList     {$$ = own3Child("DecList", $1, $2, $3);}
+DecList: Dec            {
+                            $$ = own1Child("DecList", $1);
+                            DECCodeList = NULL;
+                            addToDECCodeList($1);
+                        }
+|  Dec COMMA  DecList     {$$ = own3Child("DecList", $1, $2, $3);
+                            addToDECCodeList($1);
+                        }
 ;
 Dec:  VarDec             {$$ =  own1Child("Dec", $1);
+                        copyCode($$, $1);
                         if(ISDefSt){
-                          VarRec* newNode = (VarRec*)malloc(sizeof(newNode));
+                          VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
                           newNode->name=$1->sval;
                           newNode->type=$1->type;
                           addToSTDefList(newNode);
+                        }                          
                         }
-                          
-                          }
 |  VarDec ASSIGNOP Exp   {$$ =  own3Child("Dec", $1, $2, $3);
                             if(ISDefSt == 1){
                                 myerror(15, "在定义时对域进行初始化");

@@ -5,6 +5,20 @@
 #include <stdarg.h>
 #include "funcs.h"
 
+void addToDECCodeList(Node* node){
+    if(node->codeHead != NULL && node->codeTail != NULL){
+        node->next = DECCodeList;
+        DECCodeList = node;
+    }
+}
+
+void addToDEFCodeList(Node* node){
+    if(node->codeHead != NULL && node->codeTail != NULL){
+        node->next = DEFCodeList;
+        DEFCodeList = node;
+    }
+}
+
 //level表示创建的类型，1->一级指针， 2->二级指针
 CodeBlock* getCodeblock(int level, ...){
     CodeBlock* newBlock = (CodeBlock*)malloc(sizeof(CodeBlock));
@@ -84,14 +98,16 @@ void copyCode(Node* target, Node* source){
 }
 
 void printCode(Node* node){
-    CodeBlock* p = node->codeHead;
-    while (p){
-        char* code = (p->level==1) ? p->pCode : (*(p->ppCode));
-        printf("%s", code);
-        if(p == node->codeTail){
-            break;
-        }else{
-            p = p->next;
+    if(node != NULL){
+        CodeBlock* p = node->codeHead;
+        while (p){
+            char* code = (p->level==1) ? p->pCode : (*(p->ppCode));
+            printf("%s", code);
+            if(p == node->codeTail){
+                break;
+            }else{
+                p = p->next;
+            }
         }
     }
 }
@@ -255,7 +271,6 @@ void _arrDefOperation_(Node* ss, Node* s1, Node*s2){
     //让VarDec包含ID的类型和值
     ss->type = s1->type;
     ss->sval = s1->sval;
-    ss->coreName = s1->coreName;
     if(addVarRec(s1) == 0){
         if(ISDefSt){
             myerror(5, "结构体中域名重复定义");
@@ -269,6 +284,7 @@ void _arrDefOperation_(Node* ss, Node* s1, Node*s2){
         sprintf(s, "DEC %s %d\n", s1->coreName, s2->subType*4);
         addCode(ss, getCodeblock(1, s));
     }
+    ss->coreName = _checkCoreName(s1->sval);
 }
 
 void _getNewVar(char** out){
@@ -298,6 +314,8 @@ void addToParmList(VarRec* node){
 }
 
 void addToSTDefList(VarRec* node){
+    //debug();
+    //printf("-");
     node->next = STDefList;
     STDefList = node;
 }
@@ -714,10 +732,12 @@ void initiate(){
     st_tail = st_head;
     st_head->next=NULL;
 
-    PARMList=NULL;
+    PARMList=NULL; 
     STDefList=NULL;
     STDclList=NULL;
     FUNCRtType=NULL;
+    DEFCodeList = NULL; 
+    DECCodeList = NULL;
     LABELnum = 0;
     VARnum = 0;
     TEMPnum = 0;

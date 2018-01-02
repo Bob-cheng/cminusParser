@@ -484,13 +484,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    39,    39,    45,    46,    48,    49,    50,    54,    59,
-      60,    63,    67,    73,    87,    92,    96,   100,   114,   125,
-     137,   143,   150,   157,   158,   160,   161,   164,   172,   179,
-     184,   189,   190,   191,   200,   202,   207,   213,   216,   217,
-     219,   220,   222,   223,   225,   234,   249,   253,   257,   266,
-     294,   300,   306,   315,   318,   321,   324,   327,   331,   346,
-     352,   365,   379,   410,   430,   448,   455,   463,   479
+       0,    39,    39,    45,    46,    48,    49,    50,    55,    60,
+      61,    64,    68,    74,    93,    98,   102,   106,   120,   131,
+     143,   149,   156,   163,   174,   176,   177,   180,   188,   195,
+     200,   205,   206,   207,   216,   218,   223,   229,   232,   235,
+     239,   248,   250,   255,   259,   268,   285,   289,   293,   302,
+     330,   336,   342,   351,   354,   357,   360,   363,   367,   382,
+     388,   401,   415,   446,   466,   484,   491,   499,   515
 };
 #endif
 
@@ -1491,49 +1491,50 @@ yyreduce:
 #line 50 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("ExtDef", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                                 funcDefOption((yyval.node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
+                                printCode((yyvsp[0].node));
                                 }
-#line 1496 "parser.c" /* yacc.c:1646  */
+#line 1497 "parser.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 54 "parser.y" /* yacc.c:1646  */
+#line 55 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own0Child("ExtDef");}
-#line 1502 "parser.c" /* yacc.c:1646  */
+#line 1503 "parser.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 59 "parser.y" /* yacc.c:1646  */
+#line 60 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("ExtDecList", (yyvsp[0].node));}
-#line 1508 "parser.c" /* yacc.c:1646  */
+#line 1509 "parser.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 60 "parser.y" /* yacc.c:1646  */
+#line 61 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("ExtDecList", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));}
-#line 1514 "parser.c" /* yacc.c:1646  */
+#line 1515 "parser.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 63 "parser.y" /* yacc.c:1646  */
+#line 64 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Specifier", (yyvsp[0].node));
                             IDType = (yyvsp[0].node)->type; 
                             (yyval.node)->type = IDType; 
                             TESTFunStage=1;}
-#line 1523 "parser.c" /* yacc.c:1646  */
+#line 1524 "parser.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 67 "parser.y" /* yacc.c:1646  */
+#line 68 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Specifier", (yyvsp[0].node)); 
                             IDType = 3;
                             (yyval.node)->type = IDType; 
                             TESTFunStage=1;
                             }
-#line 1533 "parser.c" /* yacc.c:1646  */
+#line 1534 "parser.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 73 "parser.y" /* yacc.c:1646  */
+#line 74 "parser.y" /* yacc.c:1646  */
     {//这个是结构体在定义
                                                 (yyval.node) = own5Child("StructSpecifier", (yyvsp[-4].node), (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                                                STDclList = STDefList;//给出当前的声明结构体参数表
@@ -1547,38 +1548,43 @@ yyreduce:
                                                     }
                                                 }
                                                 ISDefSt=0;
-                                                STDefList=NULL;}
-#line 1552 "parser.c" /* yacc.c:1646  */
+                                                STDefList=NULL;
+                                                
+                                                //作为debug用，其实不用输出。
+                                                //printCode(DEFCodeList);
+                                                DEFCodeList = NULL;
+                                                }
+#line 1558 "parser.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 87 "parser.y" /* yacc.c:1646  */
+#line 93 "parser.y" /* yacc.c:1646  */
     { //这个是结构体在使用
                                 (yyval.node) = own2Child("StructSpecifier", (yyvsp[-1].node), (yyvsp[0].node));
 
                             }
-#line 1561 "parser.c" /* yacc.c:1646  */
+#line 1567 "parser.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 92 "parser.y" /* yacc.c:1646  */
+#line 98 "parser.y" /* yacc.c:1646  */
     {//这个是结构体在定义
                             (yyval.node) = own0Child("OptTag");
                             ISDefSt=1;
                             }
-#line 1570 "parser.c" /* yacc.c:1646  */
+#line 1576 "parser.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 96 "parser.y" /* yacc.c:1646  */
+#line 102 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("OptTag", (yyvsp[0].node));  (yyvsp[0].node)->type = 3;
                             ISDefSt=1;
                             }
-#line 1578 "parser.c" /* yacc.c:1646  */
+#line 1584 "parser.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 100 "parser.y" /* yacc.c:1646  */
+#line 106 "parser.y" /* yacc.c:1646  */
     {//这个是结构体在使用
                                 (yyval.node) = own1Child("Tag", (yyvsp[0].node));
                                 VarRec* rcd = checkVarRec((yyvsp[0].node));
@@ -1591,11 +1597,11 @@ yyreduce:
                                         //outPutLinks(STDclList);
                                     }
                             }
-#line 1595 "parser.c" /* yacc.c:1646  */
+#line 1601 "parser.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 114 "parser.y" /* yacc.c:1646  */
+#line 120 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own4Child("FunDec", (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node)); 
                             (yyvsp[-3].node)->type = 4;
                             (yyvsp[-3].node)->parmCnt = (yyvsp[-1].node)->parmCnt;
@@ -1607,11 +1613,11 @@ yyreduce:
                             }
                             _decFunc_((yyvsp[-3].node));
                             }
-#line 1611 "parser.c" /* yacc.c:1646  */
+#line 1617 "parser.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 125 "parser.y" /* yacc.c:1646  */
+#line 131 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("FunDec", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                                 (yyvsp[-2].node)->type = 4;  
                                 (yyvsp[-2].node)->subType = IDType;
@@ -1623,117 +1629,127 @@ yyreduce:
                                 }
                                 _decFunc_((yyvsp[-2].node));
                             }
-#line 1627 "parser.c" /* yacc.c:1646  */
+#line 1633 "parser.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 137 "parser.y" /* yacc.c:1646  */
+#line 143 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("VarList", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                                     VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
                                     newNode->name = (yyvsp[-2].node)->sval;
                                     newNode->type = (yyvsp[-2].node)->type;
                                     addToParmList(newNode);
                                     (yyval.node)->parmCnt = (yyvsp[0].node)->parmCnt + 1;}
-#line 1638 "parser.c" /* yacc.c:1646  */
+#line 1644 "parser.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 143 "parser.y" /* yacc.c:1646  */
+#line 149 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("VarList", (yyvsp[0].node));
                             VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
                             newNode->name = (yyvsp[0].node)->sval;
                             newNode->type = (yyvsp[0].node)->type;
                             addToParmList(newNode);
                             (yyval.node)->parmCnt=1;}
-#line 1649 "parser.c" /* yacc.c:1646  */
+#line 1655 "parser.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 150 "parser.y" /* yacc.c:1646  */
+#line 156 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own2Child("ParamDec", (yyvsp[-1].node), (yyvsp[0].node));
                                 (yyval.node)->type = (yyvsp[0].node)->type;
                                 (yyval.node)->sval = (yyvsp[0].node)->sval;//这两个属性已经在下方定义过了
 
                                 }
-#line 1659 "parser.c" /* yacc.c:1646  */
-    break;
-
-  case 23:
-#line 157 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own4Child("CompSt", (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node)); STDefList=NULL;}
 #line 1665 "parser.c" /* yacc.c:1646  */
     break;
 
+  case 23:
+#line 163 "parser.y" /* yacc.c:1646  */
+    {(yyval.node) = own4Child("CompSt", (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node)); 
+                                STDefList=NULL;
+                                //将递归起来的DefList代码传递给Compst
+                                Node* p = DEFCodeList;
+                                while(p){
+                                    copyCode((yyval.node), p);
+                                    p = p->next;
+                                }
+                                DEFCodeList = NULL;
+
+                                }
+#line 1681 "parser.c" /* yacc.c:1646  */
+    break;
+
   case 24:
-#line 158 "parser.y" /* yacc.c:1646  */
+#line 174 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own0Child("CompSt");}
-#line 1671 "parser.c" /* yacc.c:1646  */
+#line 1687 "parser.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 160 "parser.y" /* yacc.c:1646  */
+#line 176 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own0Child("StmtList");}
-#line 1677 "parser.c" /* yacc.c:1646  */
+#line 1693 "parser.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 161 "parser.y" /* yacc.c:1646  */
+#line 177 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own2Child("StmtList", (yyvsp[-1].node), (yyvsp[0].node));}
-#line 1683 "parser.c" /* yacc.c:1646  */
+#line 1699 "parser.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 164 "parser.y" /* yacc.c:1646  */
+#line 180 "parser.y" /* yacc.c:1646  */
     {   _pushSNextStack();                    
                             char* l;
                             _getNewLabel(&l); 
                             STMTNext = l;
                             
                         }
-#line 1694 "parser.c" /* yacc.c:1646  */
+#line 1710 "parser.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 172 "parser.y" /* yacc.c:1646  */
+#line 188 "parser.y" /* yacc.c:1646  */
     {
                             (yyval.node) = own1Child("NEWStmt", (yyvsp[0].node));
                             //_putLabel_(STMTNext);
                             _popSNextStack();
                         }
-#line 1704 "parser.c" /* yacc.c:1646  */
+#line 1720 "parser.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 179 "parser.y" /* yacc.c:1646  */
+#line 195 "parser.y" /* yacc.c:1646  */
     {
                             _putLabel_(EXPTrue);
                             
                         }
-#line 1713 "parser.c" /* yacc.c:1646  */
+#line 1729 "parser.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 184 "parser.y" /* yacc.c:1646  */
+#line 200 "parser.y" /* yacc.c:1646  */
     {
                             _putLabel_(EXPTrue);
                         }
-#line 1721 "parser.c" /* yacc.c:1646  */
+#line 1737 "parser.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 189 "parser.y" /* yacc.c:1646  */
+#line 205 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own2Child("Stmt", (yyvsp[-1].node), (yyvsp[0].node)); printCode((yyvsp[-1].node));}
-#line 1727 "parser.c" /* yacc.c:1646  */
+#line 1743 "parser.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 190 "parser.y" /* yacc.c:1646  */
+#line 206 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Stmt", (yyvsp[0].node));}
-#line 1733 "parser.c" /* yacc.c:1646  */
+#line 1749 "parser.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 191 "parser.y" /* yacc.c:1646  */
+#line 207 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Stmt", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                             //添加返回链表
                             FUNCRt* newNode = (FUNCRt*)malloc(sizeof(FUNCRt));
@@ -1743,95 +1759,113 @@ yyreduce:
                             FUNCRtType = newNode;
                             printf("RETURN %s\n", (yyvsp[-1].node)->coreName);
                          }
-#line 1747 "parser.c" /* yacc.c:1646  */
+#line 1763 "parser.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 200 "parser.y" /* yacc.c:1646  */
+#line 216 "parser.y" /* yacc.c:1646  */
     {
                                     (yyval.node) = own5Child("Stmt", (yyvsp[-5].node), (yyvsp[-4].node), (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[0].node));}
-#line 1754 "parser.c" /* yacc.c:1646  */
+#line 1770 "parser.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 202 "parser.y" /* yacc.c:1646  */
+#line 218 "parser.y" /* yacc.c:1646  */
     {
                             
                             (yyval.node) = own7Child("Stmt", (yyvsp[-7].node), (yyvsp[-6].node), (yyvsp[-5].node), (yyvsp[-4].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                             _popTfStack();
                             }
-#line 1764 "parser.c" /* yacc.c:1646  */
+#line 1780 "parser.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 207 "parser.y" /* yacc.c:1646  */
+#line 223 "parser.y" /* yacc.c:1646  */
     {
                                 (yyval.node) = own5Child("Stmt", (yyvsp[-5].node), (yyvsp[-4].node), (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[0].node));
                                 _putGoto_(STMTNext);
                                 _popSNextStack();
                                 _popTfStack();
                                 }
-#line 1775 "parser.c" /* yacc.c:1646  */
+#line 1791 "parser.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 213 "parser.y" /* yacc.c:1646  */
+#line 229 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own0Child("Stmt"); }
-#line 1781 "parser.c" /* yacc.c:1646  */
+#line 1797 "parser.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 216 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own0Child("DefList");}
-#line 1787 "parser.c" /* yacc.c:1646  */
-    break;
-
-  case 39:
-#line 217 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own2Child("DefList", (yyvsp[-1].node), (yyvsp[0].node));}
-#line 1793 "parser.c" /* yacc.c:1646  */
-    break;
-
-  case 40:
-#line 219 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own3Child("Def", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));}
-#line 1799 "parser.c" /* yacc.c:1646  */
-    break;
-
-  case 41:
-#line 220 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own0Child("Def"); }
+#line 232 "parser.y" /* yacc.c:1646  */
+    {(yyval.node) = own0Child("DefList");
+                            DEFCodeList = NULL;
+                        }
 #line 1805 "parser.c" /* yacc.c:1646  */
     break;
 
+  case 39:
+#line 235 "parser.y" /* yacc.c:1646  */
+    {(yyval.node) = own2Child("DefList", (yyvsp[-1].node), (yyvsp[0].node));
+                            addToDEFCodeList((yyvsp[-1].node));
+                        }
+#line 1813 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 40:
+#line 239 "parser.y" /* yacc.c:1646  */
+    {
+                            (yyval.node) = own3Child("Def", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
+                            Node* p = DECCodeList;
+                            while(p){
+                                copyCode((yyval.node), p);
+                                p = p->next;
+                            }
+                            DECCodeList = NULL;
+                            }
+#line 1827 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 41:
+#line 248 "parser.y" /* yacc.c:1646  */
+    {(yyval.node) = own0Child("Def"); }
+#line 1833 "parser.c" /* yacc.c:1646  */
+    break;
+
   case 42:
-#line 222 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own1Child("DecList", (yyvsp[0].node));}
-#line 1811 "parser.c" /* yacc.c:1646  */
+#line 250 "parser.y" /* yacc.c:1646  */
+    {
+                            (yyval.node) = own1Child("DecList", (yyvsp[0].node));
+                            DECCodeList = NULL;
+                            addToDECCodeList((yyvsp[0].node));
+                        }
+#line 1843 "parser.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 223 "parser.y" /* yacc.c:1646  */
-    {(yyval.node) = own3Child("DecList", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));}
-#line 1817 "parser.c" /* yacc.c:1646  */
+#line 255 "parser.y" /* yacc.c:1646  */
+    {(yyval.node) = own3Child("DecList", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
+                            addToDECCodeList((yyvsp[-2].node));
+                        }
+#line 1851 "parser.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 225 "parser.y" /* yacc.c:1646  */
+#line 259 "parser.y" /* yacc.c:1646  */
     {(yyval.node) =  own1Child("Dec", (yyvsp[0].node));
+                        copyCode((yyval.node), (yyvsp[0].node));
                         if(ISDefSt){
-                          VarRec* newNode = (VarRec*)malloc(sizeof(newNode));
+                          VarRec* newNode = (VarRec*)malloc(sizeof(VarRec));
                           newNode->name=(yyvsp[0].node)->sval;
                           newNode->type=(yyvsp[0].node)->type;
                           addToSTDefList(newNode);
+                        }                          
                         }
-                          
-                          }
-#line 1831 "parser.c" /* yacc.c:1646  */
+#line 1865 "parser.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 234 "parser.y" /* yacc.c:1646  */
+#line 268 "parser.y" /* yacc.c:1646  */
     {(yyval.node) =  own3Child("Dec", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                             if(ISDefSt == 1){
                                 myerror(15, "在定义时对域进行初始化");
@@ -1839,39 +1873,41 @@ yyreduce:
                             if((yyvsp[-2].node)->type != (yyvsp[0].node)->type){
                                 myerror(5, "赋值号两边的表达式类型不匹配。");
                             }
+                            combineNodeCode((yyval.node), 2, (yyvsp[-2].node), (yyvsp[0].node));
+                            addCode((yyval.node), getCodeblock(1, s_AEqualB_((yyvsp[-2].node)->coreName, (yyvsp[0].node)->coreName)));
                           }
-#line 1844 "parser.c" /* yacc.c:1646  */
+#line 1880 "parser.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 249 "parser.y" /* yacc.c:1646  */
+#line 285 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own2Child("VarDec", (yyvsp[-1].node), (yyvsp[0].node)); 
                     _arrDefOperation_((yyval.node), (yyvsp[-1].node), (yyvsp[0].node));
                     }
-#line 1852 "parser.c" /* yacc.c:1646  */
+#line 1888 "parser.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 253 "parser.y" /* yacc.c:1646  */
+#line 289 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own0Child("VarDec_x"); 
                         (yyval.node)->type = 0; (yyval.node)->arrDim=0; 
                         (yyval.node)->subType=1; //用subtype来表示分配空间的大小
                         }
-#line 1861 "parser.c" /* yacc.c:1646  */
+#line 1897 "parser.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 257 "parser.y" /* yacc.c:1646  */
+#line 293 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own4Child("VarDec_x", (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node)); 
                         (yyval.node)->type = 5; 
                         (yyval.node)->arrDim = (yyvsp[0].node)->arrDim+1;
                         (yyval.node)->subType= (yyvsp[0].node)->subType * (yyvsp[-2].node)->ival;
                         }
-#line 1871 "parser.c" /* yacc.c:1646  */
+#line 1907 "parser.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 266 "parser.y" /* yacc.c:1646  */
+#line 302 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                         if((yyvsp[-2].node)->type != (yyvsp[0].node)->type){
                             myerror(5, "赋值号两边的表达式类型不匹配。");
@@ -1900,33 +1936,33 @@ yyreduce:
                             (yyval.node)->coreName = (yyvsp[-2].node)->coreName;
                         }
                         }
-#line 1904 "parser.c" /* yacc.c:1646  */
+#line 1940 "parser.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 294 "parser.y" /* yacc.c:1646  */
+#line 330 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     if((yyvsp[-2].node)->type != (yyvsp[0].node)->type || (yyvsp[-2].node)->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
                         (yyval.node)->type = 1;
                     }}
-#line 1915 "parser.c" /* yacc.c:1646  */
+#line 1951 "parser.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 300 "parser.y" /* yacc.c:1646  */
+#line 336 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     if((yyvsp[-2].node)->type != (yyvsp[0].node)->type || (yyvsp[-2].node)->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
                         (yyval.node)->type = 1;
                     }}
-#line 1926 "parser.c" /* yacc.c:1646  */
+#line 1962 "parser.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 306 "parser.y" /* yacc.c:1646  */
+#line 342 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     if((yyvsp[-2].node)->type != (yyvsp[0].node)->type || (yyvsp[-2].node)->type == 3 || (yyvsp[-2].node)->type == 4 || (yyvsp[-2].node)->type == 5){
                         myerror(7, "操作数类型不匹配或操作数类型与操作符不匹配");
@@ -1936,52 +1972,52 @@ yyreduce:
                         _putGoto_(EXPFalse);
                         (yyval.node)->type = 1;
                     }}
-#line 1940 "parser.c" /* yacc.c:1646  */
+#line 1976 "parser.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 315 "parser.y" /* yacc.c:1646  */
+#line 351 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     _expOption_((yyval.node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     }
-#line 1948 "parser.c" /* yacc.c:1646  */
+#line 1984 "parser.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 318 "parser.y" /* yacc.c:1646  */
+#line 354 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     _expOption_((yyval.node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     }
-#line 1956 "parser.c" /* yacc.c:1646  */
+#line 1992 "parser.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 321 "parser.y" /* yacc.c:1646  */
+#line 357 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     _expOption_((yyval.node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     }
-#line 1964 "parser.c" /* yacc.c:1646  */
+#line 2000 "parser.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 324 "parser.y" /* yacc.c:1646  */
+#line 360 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     _expOption_((yyval.node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     }
-#line 1972 "parser.c" /* yacc.c:1646  */
+#line 2008 "parser.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 327 "parser.y" /* yacc.c:1646  */
+#line 363 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     copyCode((yyval.node), (yyvsp[-1].node));
                     (yyval.node)->type = (yyvsp[-1].node)->type;
                     (yyval.node)->coreName = (yyvsp[-1].node)->coreName;}
-#line 1981 "parser.c" /* yacc.c:1646  */
+#line 2017 "parser.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 331 "parser.y" /* yacc.c:1646  */
+#line 367 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own2Child("Exp", (yyvsp[-1].node), (yyvsp[0].node));
                                 if((yyvsp[0].node)->type != 1 && (yyvsp[0].node)->type != 2){
                                     myerror(-2, "仅有int型和float型变量才能参与算术运算。");
@@ -1997,22 +2033,22 @@ yyreduce:
                                 //_AEqualB_(t, tt);
                                 addCode((yyval.node), getCodeblock(1, s_AEqualB_(t, tt)));
                             }
-#line 2001 "parser.c" /* yacc.c:1646  */
+#line 2037 "parser.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 346 "parser.y" /* yacc.c:1646  */
+#line 382 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own2Child("Exp", (yyvsp[-1].node), (yyvsp[0].node));
                     if((yyvsp[0].node)->type != 1){
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
                         (yyval.node)->type = 1;
                     }}
-#line 2012 "parser.c" /* yacc.c:1646  */
+#line 2048 "parser.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 352 "parser.y" /* yacc.c:1646  */
+#line 388 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own4Child("Exp", (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     if(!strcmp((yyvsp[-3].node)->sval, "write")){
                         //printf("WRITE %s\n", $3->coreName);
@@ -2026,11 +2062,11 @@ yyreduce:
                         _callFunc_((yyval.node), (yyvsp[-3].node), (yyvsp[-1].node)); 
                     }
                 }
-#line 2030 "parser.c" /* yacc.c:1646  */
+#line 2066 "parser.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 365 "parser.y" /* yacc.c:1646  */
+#line 401 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     if(!strcmp("read", (yyvsp[-2].node)->sval)){
                         char* t;
@@ -2045,11 +2081,11 @@ yyreduce:
                         _callFunc_((yyval.node), (yyvsp[-2].node), NULL);
                     }
                 }
-#line 2049 "parser.c" /* yacc.c:1646  */
+#line 2085 "parser.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 379 "parser.y" /* yacc.c:1646  */
+#line 415 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own4Child("Exp", (yyvsp[-3].node), (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     if((yyvsp[-3].node)->type != 5){
                         myerror(10, "对非数组型变量使用“[…]”（数组访问）操作符。");
@@ -2081,11 +2117,11 @@ yyreduce:
                         (yyval.node)->subType = (yyvsp[-3].node)->subType;
                     }
                     }
-#line 2085 "parser.c" /* yacc.c:1646  */
+#line 2121 "parser.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 410 "parser.y" /* yacc.c:1646  */
+#line 446 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Exp", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                 if((yyvsp[-2].node)->type != 3){
                     myerror(13, "对非结构体型变量使用“.”操作符。");
@@ -2106,11 +2142,11 @@ yyreduce:
                     }
                 }
                 }
-#line 2110 "parser.c" /* yacc.c:1646  */
+#line 2146 "parser.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 430 "parser.y" /* yacc.c:1646  */
+#line 466 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Exp", (yyvsp[0].node)); 
         VarRec* rcd = checkVarRec((yyvsp[0].node));
         if(rcd == NULL){
@@ -2129,11 +2165,11 @@ yyreduce:
         }
         
         }
-#line 2133 "parser.c" /* yacc.c:1646  */
+#line 2169 "parser.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 448 "parser.y" /* yacc.c:1646  */
+#line 484 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Exp", (yyvsp[0].node)); (yyval.node)->type = 1; (yyval.node)->subType = -1;
         (yyval.node)->coreName = _insNumFmt((yyvsp[0].node)->sval);
         // char* t;
@@ -2141,11 +2177,11 @@ yyreduce:
         // _AEqualB_(t, _insNumFmt($1->sval));
         // $$->coreName = t;
 }
-#line 2145 "parser.c" /* yacc.c:1646  */
+#line 2181 "parser.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 455 "parser.y" /* yacc.c:1646  */
+#line 491 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Exp", (yyvsp[0].node)); (yyval.node)->type = 2; (yyval.node)->subType = -1;
         (yyval.node)->coreName = _insNumFmt((yyvsp[0].node)->sval);
         // char* t;
@@ -2153,11 +2189,11 @@ yyreduce:
         // _AEqualB_(t, _insNumFmt($1->sval));
         // $$->coreName = t;
         }
-#line 2157 "parser.c" /* yacc.c:1646  */
+#line 2193 "parser.c" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 463 "parser.y" /* yacc.c:1646  */
+#line 499 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own3Child("Args", (yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node));
                     (yyval.node)->parmCnt = ((yyvsp[0].node)->parmCnt)+1;
                     VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
@@ -2174,11 +2210,11 @@ yyreduce:
                        addCode((yyval.node), getCodeblock(1, s));
                     }
                     }
-#line 2178 "parser.c" /* yacc.c:1646  */
+#line 2214 "parser.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 479 "parser.y" /* yacc.c:1646  */
+#line 515 "parser.y" /* yacc.c:1646  */
     {(yyval.node) = own1Child("Args", (yyvsp[0].node));
         (yyval.node)->parmCnt = 1;
         VarRec* arg = (VarRec*)malloc(sizeof(VarRec));
@@ -2194,11 +2230,11 @@ yyreduce:
             addCode((yyvsp[0].node), getCodeblock(1, s));
         }
         }
-#line 2198 "parser.c" /* yacc.c:1646  */
+#line 2234 "parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 2202 "parser.c" /* yacc.c:1646  */
+#line 2238 "parser.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2433,6 +2469,6 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 495 "parser.y" /* yacc.c:1906  */
+#line 531 "parser.y" /* yacc.c:1906  */
 
 

@@ -8,7 +8,8 @@ int TEMPnum;//中间代码生成的临时变量标识
 int LABELnum;//中间代码生成的标签标识
 int SPECIALFUNC;//判断是否是特殊函数的标签
 int TESTFunStage;
-int FUNCRtTypeINT;
+int FUNCRtTypeINT; //记录函数的返回类型
+
 
 typedef struct CodeBlock{
     int level; //表示指针的级数，1表示一级指针，2表示二级指针
@@ -80,7 +81,11 @@ typedef struct Node
     char* sNextL;  //用于stmt的结束出口标签
     CodeBlock* codeHead; //用于指向代码链的头部
     CodeBlock* codeTail; //用于指向代码链的尾部
+    struct Node* next; //在特殊的时候衔接下一个node，比如说衔接代码串
 } Node;
+
+Node* DECCodeList;
+Node* DEFCodeList;
 
 typedef struct FuncRec
 {
@@ -147,6 +152,8 @@ void addCode(Node* target, CodeBlock* code);
 void copyCode(Node* target, Node* source);
 char*  s_AEqualB_(char* a, char* b);
 void printCode(Node* node);
+void addToDECCodeList(Node* node);
+void addToDEFCodeList(Node* node);
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);
