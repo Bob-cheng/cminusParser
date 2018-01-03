@@ -88,6 +88,14 @@ Node* DECCodeList;
 Node* DEFCodeList;
 Node* PStmtCodeList;
 
+typedef struct CodeStack{
+    int top;
+    Node* stack[100];
+} CodeStack;
+CodeStack defCodeListStk;
+CodeStack pStmtCodeListStk;
+
+
 typedef struct FuncRec
 {
     char* name;
@@ -158,6 +166,10 @@ void addToDEFCodeList(Node* node);
 void addToPStmtCodeList(Node* node);
 Node* n_putLabel_(char** l);
 Node* n_putGoto_(char** l);
+void pushDefCodeListStk();
+void popDefCodeListStk();
+void pushPStmtCodeListStk();
+void popPStmtCodeListStk();
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);

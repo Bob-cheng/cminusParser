@@ -170,6 +170,7 @@ CompSt: LC DefList StmtList RC  {$$ = own4Child("CompSt", $1, $2, $3, $4);
                                     p = p->next;
                                 }
                                 DEFCodeList = NULL;
+                                popDefCodeListStk();
                                 //将递归起来的StmtList代码传递给Compst
                                 Node* q = PStmtCodeList;
                                 while(q){
@@ -177,10 +178,12 @@ CompSt: LC DefList StmtList RC  {$$ = own4Child("CompSt", $1, $2, $3, $4);
                                     q = q->next;
                                 }
                                 PStmtCodeList = NULL;
+                                popPStmtCodeListStk();
                                 }
 | error RC              {$$ = own0Child("CompSt");}
 ;
 StmtList:               {$$ = own0Child("StmtList");
+                        pushPStmtCodeListStk();
                         PStmtCodeList = NULL;
                         }
 | PStmt StmtList         {$$ = own2Child("StmtList", $1, $2);
@@ -244,14 +247,20 @@ PStmt: Stmt                {
                             
 //                         }
 // ;
-PREWS:                  {
-                            _putLabel_(EXPTrue);
-                        }
-;
+// PREWS:                  {
+//                             _putLabel_(EXPTrue);
+//                         }
+// ;
 
 
 Stmt:   IF LP Exp RP  PStmt    %prec AFTER_ELSE {
-                                    $$ = own5Child("Stmt", $1, $2, $3, $4, $5);}    
+                                    $$ = own5Child("Stmt", $1, $2, $3, $4, $5);
+                                    char* l1;
+                                    _getNewLabel(&l1);
+                                    strcpy($3->trueL, l1);
+                                    $3->falseL = $$->sNextL;
+                                    combineNodeCode($$, 3, $3, n_putLabel_(&($3->trueL)), $5);
+                                        }    
 | IF LP Exp RP  PStmt ELSE PStmt  {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);
                                 char* l1, *l2;
                                 _getNewLabel(&l1);
@@ -260,8 +269,8 @@ Stmt:   IF LP Exp RP  PStmt    %prec AFTER_ELSE {
                                 strcpy($3->trueL, l1);
                                 //$3->falseL = l2;
                                 strcpy($3->falseL, l2);
-                                $5->sNextL = $$->sNextL;
-                                $7->sNextL = $$->sNextL;
+                                //$5->sNextL = $$->sNextL;
+                                //$7->sNextL = $$->sNextL;
                                 copyCode($$, $3); //B.code
                                 copyCode($$, n_putLabel_(&($3->trueL)));
                                 //addCode($$, getCodeblock(2,&($3->trueL)));
@@ -271,16 +280,24 @@ Stmt:   IF LP Exp RP  PStmt    %prec AFTER_ELSE {
                                 copyCode($$, $7);//S2.code
                             //_popTfStack();
                             }
-| WHILE LP Exp RP  PREWS PStmt {
-                                $$ = own5Child("Stmt", $1, $2, $3, $4, $6);
-                                _putGoto_(STMTNext);
-                                _popSNextStack();
-                                _popTfStack();
+| WHILE LP Exp RP  PStmt {
+                                $$ = own5Child("Stmt", $1, $2, $3, $4, $5);
+                                // _putGoto_(STMTNext);
+                                // _popSNextStack();
+                                // _popTfStack();
+                                char* begin, *l1;
+                                _getNewLabel(&begin);
+                                _getNewLabel(&l1);
+                                strcpy($3->trueL,  l1);
+                                $3->falseL = $$->sNextL;
+                                combineNodeCode($$, 5, n_putLabel_(&begin), $3, n_putLabel_(&($3->trueL)),
+                                                $5, n_putGoto_(&begin));
                                 }
 | error SEMI            {$$ = own0Child("Stmt"); }
 ;
 
 DefList:                {$$ = own0Child("DefList");
+                            pushDefCodeListStk();
                             DEFCodeList = NULL;
                         }
 | Def DefList           {$$ = own2Child("DefList", $1, $2);

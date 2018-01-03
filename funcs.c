@@ -181,7 +181,27 @@ void _popSNextStack(){
     sNextStack.top--;
 }
 
+void pushDefCodeListStk(){
+    int top = ++defCodeListStk.top;
+    defCodeListStk.stack[top] = DEFCodeList;
+}
 
+void popDefCodeListStk(){
+    int top = defCodeListStk.top;
+    DEFCodeList = defCodeListStk.stack[top];
+    defCodeListStk.top--;
+}
+
+void pushPStmtCodeListStk(){
+    int top = ++pStmtCodeListStk.top;
+    pStmtCodeListStk.stack[top] = PStmtCodeList;
+}
+
+void popPStmtCodeListStk(){
+    int top = pStmtCodeListStk.top;
+    PStmtCodeList = pStmtCodeListStk.stack[top];
+    pStmtCodeListStk.top--;
+}
 
 char* _insNumFmt(char* in){
     char * out;
@@ -770,9 +790,6 @@ void initiate(){
     STDefList=NULL;
     STDclList=NULL;
     FUNCRtType=NULL;
-    DEFCodeList = NULL; 
-    DECCodeList = NULL;
-    PStmtCodeList = NULL; 
     LABELnum = 0;
     VARnum = 0;
     TEMPnum = 0;
@@ -799,12 +816,16 @@ void initiate(){
     funcWrite->parmCnt = 1;
     addFuncRec(funcWrite);
 
-    tfStack.top=-1;
-    EXPTrue =NULL;
-    EXPFalse =NULL;
-    sNextStack.top=-1;
-    STMTNext =NULL;
-
+    // tfStack.top=-1;
+    // EXPTrue =NULL;
+    // EXPFalse =NULL;
+    // sNextStack.top=-1;
+    // STMTNext =NULL;
+    defCodeListStk.top = -1;
+    pStmtCodeListStk.top = -1;
+    DEFCodeList = NULL; 
+    DECCodeList = NULL;
+    PStmtCodeList = NULL; 
     // char* a = "123\n", *b = "666\n";
     // Node* testNode = (Node*)malloc(sizeof(Node));
     // Node* testNode2 = (Node*)malloc(sizeof(Node));

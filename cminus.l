@@ -9,8 +9,8 @@ int iserror = 1;
 %}
 %option yylineno
 
-integer         -?([1-9][0-9]*)|-?(0[0-7]*)|(0x[0-9A-F]*)
-float           -?([0-9]+\.[0-9]*)|-?([0-9]+\.[0-9]*e-?[1-9][0-9]*)
+integer         ([1-9][0-9]*)|-?(0[0-7]*)|(0x[0-9A-F]*)
+float           ([0-9]+\.[0-9]*)|-?([0-9]+\.[0-9]*e-?[1-9][0-9]*)
 id              [a-zA-Z_][a-zA-Z0-9_]*
 ws              [ \t]+
 
@@ -150,15 +150,15 @@ ws              [ \t]+
 "while"         {
     Node* np = getStrNode(yytext,yylineno, "WHILE", yyleng);
     yylval.node = np;
-    _pushTfStack();
-    char* l, *l1;
-    _getNewLabel(&l);
-    _getNewLabel(&l1);
-    EXPTrue = l1;
-    EXPFalse = STMTNext;
-    _pushSNextStack();
-    STMTNext=l;
-    _putLabel_(l);
+    // _pushTfStack();
+    // char* l, *l1;
+    // _getNewLabel(&l);
+    // _getNewLabel(&l1);
+    // EXPTrue = l1;
+    // EXPFalse = STMTNext;
+    // _pushSNextStack();
+    // STMTNext=l;
+    // _putLabel_(l);
     return WHILE;}
 {id}            {
     Node* np = getStrNode(yytext, yylineno, "ID", yyleng);
