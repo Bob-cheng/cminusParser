@@ -1,0 +1,58 @@
+FUNCTION fact :
+PARAM v_001
+IF v_001 == #1 GOTO label_001
+GOTO label_002
+LABEL label_001 :
+RETURN v_001
+GOTO label_003
+LABEL label_002 :
+t_001 := v_001 - #1
+ARG t_001
+t_002 := CALL fact
+t_003 := v_001 * t_002
+RETURN t_003
+LABEL label_003 :
+
+FUNCTION inc :
+PARAM v_002
+PARAM v_003
+v_004 := #2
+v_005 := #5
+DEC v_006 40
+READ t_004
+v_003 := t_004
+LABEL label_011 :
+IF v_004 > #0 GOTO label_007
+GOTO label_008
+LABEL label_007 :
+IF v_004 == #1 GOTO label_005
+GOTO label_004
+LABEL label_004 :
+v_005 := #10
+ARG v_002
+t_005 := CALL fact
+v_002 := t_005
+LABEL label_005 :
+t_006 := v_005 - #1
+v_005 := t_006
+t_007 := v_004 - #1
+v_004 := t_007
+GOTO label_011
+LABEL label_008 :
+IF v_004 == #1 GOTO label_011
+GOTO label_010
+LABEL label_010 :
+IF v_004 == #3 GOTO label_009
+GOTO label_012
+LABEL label_009 :
+IF v_005 == #3 GOTO label_011
+GOTO label_012
+LABEL label_011 :
+v_002 := #3
+GOTO label_013
+LABEL label_012 :
+v_002 := #4
+WRITE v_002
+LABEL label_013 :
+RETURN v_005
+

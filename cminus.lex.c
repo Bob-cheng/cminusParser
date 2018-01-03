@@ -2176,11 +2176,17 @@ int main(int argc, char **argv)
 {
     initiate();
 
-    if(argc > 1) {
+    if(argc == 2) {
         if(!(yyin = fopen(argv[1], "r"))) {
             perror(argv[1]);
             return (1);
         }
+    }else if(argc ==3){
+        if(!(yyin = fopen(argv[1], "r"))) {
+            perror(argv[1]);
+            return (1);
+        }
+        freopen(argv[2], "w", stdout);
     }
     yyparse();
 }

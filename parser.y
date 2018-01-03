@@ -51,6 +51,7 @@ ExtDef: Specifier ExtDecList SEMI   {$$ = own3Child("ExtDef", $1, $2, $3);}
                                 funcDefOption($$, $1, $2, $3);
                                 //这里还没写完，暂时不用输出
                                 printCode($3);
+                                printf("\n");
                                 }
                                 
 | error SEMI                {$$ = own0Child("ExtDef");}
@@ -461,10 +462,13 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     _expOption_($$, $1, $2, $3);
                     }
 | LP Exp RP      {  //codeOK
-                    $$ = own3Child("Exp", $1, $2, $3);
-                    copyCode($$, $2);
-                    $$->type = $2->type;
-                    $$->coreName = $2->coreName;}
+                    //$$ = own3Child("Exp", $1, $2, $3);
+                    //copyCode($$, $2);
+                    //$$->type = $2->type;
+                    //$$->coreName = $2->coreName;
+                    $$ = $2; 
+                    // 这里处理的很巧妙，因为括号只是起到辅助归约的作用实际上节点没有任何的区别。
+                }
 | MINUS Exp    %prec RMINUS  {  //codeOK
                                 $$ = own2Child("Exp", $1, $2);
                                 if($2->type != 1 && $2->type != 2){
@@ -486,8 +490,10 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         myerror(-2, "仅有int型变量才能进行逻辑运算");
                     }else{
                         $$->type = 1;
-                        $2->trueL = $$->falseL;
-                        $2->falseL = $$->trueL;
+                        // $2->trueL = $$->falseL;
+                        //$2->falseL = $$->trueL;
+                        labelAssign($2, $$, 0, 1);
+                        labelAssign($2, $$, 1, 0);
                         copyCode($$, $2);
                     }}
 | ID LP Args RP  {  //codeOK

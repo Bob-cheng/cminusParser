@@ -80,8 +80,8 @@ typedef struct Node
     char* falseL; //用于表达式的假出口标签 类型为1
     char* sNextL;  //用于stmt的结束出口标签 类型为2
     char** labelsAddr[3];//为了编程方便，将上述三个标签的地址储存在这里
-    char** citeTable[3][100];
-    int citeTableTop[3];
+    char** citeTable[3][100]; //表示引用了本节点某个标签的其他节点的标签地址，行号表示标签类型。
+    int citeTableTop[3]; //表示引用表每一行的顶端
     CodeBlock* codeHead; //用于指向代码链的头部
     CodeBlock* codeTail; //用于指向代码链的尾部
     struct Node* next; //在特殊的时候衔接下一个node，比如说衔接代码串
