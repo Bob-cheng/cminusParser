@@ -151,9 +151,9 @@ void printCode(Node* node){
 
 
 
-void _AEqualB_(char* a, char* b){
-    printf("%s := %s\n", a, b);
-}
+// void _AEqualB_(char* a, char* b){
+//     printf("%s := %s\n", a, b);
+// }
 
 char*  s_AEqualB_(char* a, char* b){
     char* s1 = (char*)malloc(sizeof(char)*100);
@@ -162,13 +162,13 @@ char*  s_AEqualB_(char* a, char* b){
     return s1;
 }
 
-void _putLabel_(char* l){
-    printf("LABEL %s :\n", l);
-}
+// void _putLabel_(char* l){
+//     printf("LABEL %s :\n", l);
+// }
 
-void _putGoto_(char* l){
-    printf("GOTO %s\n", l);
-}
+// void _putGoto_(char* l){
+//     printf("GOTO %s\n", l);
+// }
 
 Node* n_putLabel_(char** l){
     //printf("LABEL %s :\n", l);
