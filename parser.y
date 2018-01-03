@@ -258,8 +258,8 @@ Stmt:   IF LP Exp RP  PStmt    %prec AFTER_ELSE {
                                     char* l1;
                                     _getNewLabel(&l1);
                                     strcpy($3->trueL, l1);
-                                    $3->falseL = $$->sNextL;
-                                    //labelAssign($3, $$, 1, 2);
+                                    //$3->falseL = $$->sNextL;
+                                    labelAssign($3, $$, 1, 2);
                                     combineNodeCode($$, 3, $3, n_putLabel_(&($3->trueL)), $5);
                                         }    
 | IF LP Exp RP  PStmt ELSE PStmt  {$$ = own7Child("Stmt", $1, $2, $3, $4, $5, $6, $7);
@@ -290,7 +290,8 @@ Stmt:   IF LP Exp RP  PStmt    %prec AFTER_ELSE {
                                 _getNewLabel(&begin);
                                 _getNewLabel(&l1);
                                 strcpy($3->trueL,  l1);
-                                $3->falseL = $$->sNextL;
+                                //$3->falseL = $$->sNextL;
+                                labelAssign($3, $$, 1, 2);
                                 combineNodeCode($$, 5, n_putLabel_(&begin), $3, n_putLabel_(&($3->trueL)),
                                                 $5, n_putGoto_(&begin));
                                 }
@@ -405,9 +406,12 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         char* l;
                         _getNewLabel(&l);
                         strcpy($1->trueL, l);
-                        $1->falseL = $$->falseL;
-                        $3->trueL = $$->trueL;
-                        $3->falseL = $$->falseL;
+                        // $1->falseL = $$->falseL;
+                        // $3->trueL = $$->trueL;
+                        // $3->falseL = $$->falseL;
+                        labelAssign($1, $$, 1, 1);
+                        labelAssign($3, $$, 0, 0);
+                        labelAssign($3, $$, 1, 1);
                         combineNodeCode($$, 3, $1, n_putLabel_(&($1->trueL)), $3);
                     }}
 | Exp OR Exp     {$$ = own3Child("Exp", $1, $2, $3);
@@ -419,8 +423,10 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         char* l;
                         _getNewLabel(&l);
                         strcpy($1->falseL, l);
-                        $3->trueL = $$->trueL;
-                        $3->falseL = $$->falseL;
+                        // $3->trueL = $$->trueL;
+                        // $3->falseL = $$->falseL;
+                        labelAssign($3, $$, 0, 0);
+                        labelAssign($3, $$, 1, 1);
                         combineNodeCode($$, 3, $1,n_putLabel_(&($1->falseL)), $3);
                     }}
 | Exp RELOP Exp  {$$ = own3Child("Exp", $1, $2, $3);
