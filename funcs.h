@@ -21,20 +21,20 @@ typedef struct CodeBlock{
 
 
 
-typedef struct TFStack{
-    int top;
-    char* stack[100][2];
-} TFStack;
-TFStack tfStack;
-char* EXPTrue;
-char* EXPFalse;
+// typedef struct TFStack{
+//     int top;
+//     char* stack[100][2];
+// } TFStack;
+// TFStack tfStack;
+// char* EXPTrue;
+// char* EXPFalse;
 
-typedef struct SNEXTStack{
-    int top;
-    char* stack[100];
-} SNEXTStack;
-SNEXTStack sNextStack;
-char* STMTNext;
+// typedef struct SNEXTStack{
+//     int top;
+//     char* stack[100];
+// } SNEXTStack;
+// SNEXTStack sNextStack;
+// char* STMTNext;
 
 
 typedef struct VarRec
@@ -76,9 +76,12 @@ typedef struct Node
     char* coreName;//中间代码生成的名字
     char* subCoreName;//对于数组来说需要储存两个名字,这个表示的是地址
     //char* type;// 常数的类型 tkName=='FLOAT'或'INT'有效，例如 1->int  1.0->float 
-    char* trueL;  //用于表达式的真出口标签
-    char* falseL; //用于表达式的假出口标签
-    char* sNextL;  //用于stmt的结束出口标签
+    char* trueL;  //用于表达式的真出口标签 类型为0
+    char* falseL; //用于表达式的假出口标签 类型为1
+    char* sNextL;  //用于stmt的结束出口标签 类型为2
+    char** labelsAddr[3];//为了编程方便，将上述三个标签的地址储存在这里
+    char** citeTable[3][100];
+    int citeTableTop[3];
     CodeBlock* codeHead; //用于指向代码链的头部
     CodeBlock* codeTail; //用于指向代码链的尾部
     struct Node* next; //在特殊的时候衔接下一个node，比如说衔接代码串
@@ -170,6 +173,7 @@ void pushDefCodeListStk();
 void popDefCodeListStk();
 void pushPStmtCodeListStk();
 void popPStmtCodeListStk();
+void labelAssign(Node*  tgt, Node* src, int tgtType, int srcType);
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);
@@ -181,10 +185,10 @@ char* _insNumFmt(char* in);
      void _expOption_(Node* ss, Node* s1, Node* s2, Node* s3);
      void _callFunc_(Node* ss, Node* s1, Node* s3);
      void _arrDefOperation_(Node* ss, Node* s1, Node*s2);
-void _pushTfStack();
-void _popTfStack();
-void _pushSNextStack();
-void _popSNextStack();
+// void _pushTfStack();
+// void _popTfStack();
+// void _pushSNextStack();
+// void _popSNextStack();
 void _putLabel_(char* l);
 void _putGoto_(char* l);
 

@@ -5,6 +5,35 @@
 #include <stdarg.h>
 #include "funcs.h"
 
+//将lbaddr添加到tgt的type标签的引用表里边
+void addToCiteTable(Node* tgt, char** lbaddr, int type){
+    if(type > 2 || type < 0){
+        printf("\n类型错误\n");
+        return;
+    }
+    int top = tgt->citeTableTop[type];
+    tgt->citeTable[type][top] = lbaddr;
+    tgt->citeTableTop[type] = top + 1;
+}
+
+void labelAssign(Node*  tgt, Node* src, int tgtType, int srcType){
+    if(tgtType > 2 || tgtType < 0|| srcType > 2 || srcType < 0){
+        printf("\n类型错误\n");
+        return;
+    }
+
+    addToCiteTable(src, tgt->labelsAddr[tgtType], srcType);
+    *(tgt->labelsAddr[tgtType]) = *(src->labelsAddr[srcType]);
+    int citeCount = tgt->citeTableTop[tgtType];
+    for( int i = 0; i < citeCount; i++){
+        *(tgt->citeTable[tgtType][i]) = *(src->labelsAddr[srcType]);
+        addToCiteTable(src, tgt->citeTable[tgtType][i], srcType);
+    }
+}
+
+
+
+
 void addToDECCodeList(Node* node){
     if(node->codeHead != NULL && node->codeTail != NULL){
         node->next = DECCodeList;
@@ -157,29 +186,29 @@ Node* n_putGoto_(char** l){
     return outCode;
 }
 
-void _pushTfStack(){
-    int top = ++tfStack.top;
-    tfStack.stack[top][0] = EXPTrue;
-    tfStack.stack[top][1] = EXPFalse;
-}
+// void _pushTfStack(){
+//     int top = ++tfStack.top;
+//     tfStack.stack[top][0] = EXPTrue;
+//     tfStack.stack[top][1] = EXPFalse;
+// }
 
-void _popTfStack(){
-    int top = tfStack.top;
-    EXPTrue = tfStack.stack[top][0];
-    EXPFalse = tfStack.stack[top][1];
-    tfStack.top--;
-}
+// void _popTfStack(){
+//     int top = tfStack.top;
+//     EXPTrue = tfStack.stack[top][0];
+//     EXPFalse = tfStack.stack[top][1];
+//     tfStack.top--;
+// }
 
-void _pushSNextStack(){
-    int top = ++sNextStack.top;
-    sNextStack.stack[top] = STMTNext;
-}
+// void _pushSNextStack(){
+//     int top = ++sNextStack.top;
+//     sNextStack.stack[top] = STMTNext;
+// }
 
-void _popSNextStack(){
-    int top = sNextStack.top;
-    STMTNext = sNextStack.stack[top];
-    sNextStack.top--;
-}
+// void _popSNextStack(){
+//     int top = sNextStack.top;
+//     STMTNext = sNextStack.stack[top];
+//     sNextStack.top--;
+// }
 
 void pushDefCodeListStk(){
     int top = ++defCodeListStk.top;
@@ -671,6 +700,9 @@ Node* getStrNode(char* yytext, int lineno, char* tkName,int yyleng){
     Nptr->trueL = (char*)malloc(sizeof(char)*100);
     Nptr->falseL = (char*)malloc(sizeof(char)*100);
     Nptr->sNextL = (char*)malloc(sizeof(char)*100);
+    Nptr->labelsAddr[0] = &(Nptr->trueL);
+    Nptr->labelsAddr[1] = &(Nptr->falseL);
+    Nptr->labelsAddr[2] = &(Nptr->sNextL);
     if(!strcmp(tkName, "FLOAT")){
         //Nptr->type = "float";
         if(strchr(str, 'e') != NULL){
@@ -711,6 +743,9 @@ Node* ownManyChild(char* tkName, int count, Node* ch0, Node* ch1,
     Nptr->trueL = (char*)malloc(sizeof(char)*100);
     Nptr->falseL = (char*)malloc(sizeof(char)*100);
     Nptr->sNextL = (char*)malloc(sizeof(char)*100);
+    Nptr->labelsAddr[0] = &(Nptr->trueL);
+    Nptr->labelsAddr[1] = &(Nptr->falseL);
+    Nptr->labelsAddr[2] = &(Nptr->sNextL);
     Nptr->children[0] = ch0;
     Nptr->children[1] = ch1;
     Nptr->children[2] = ch2;
