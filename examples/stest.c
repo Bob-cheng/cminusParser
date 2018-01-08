@@ -1,3 +1,8 @@
+struct myst{
+    int sta;
+    int stb[10];
+};
+
 int fact(int n)
 {
 if (n == 1)
@@ -8,7 +13,12 @@ else
 
 int inc(int c, int d){
     int a = 2, b = 5, e[10];
+    struct myst stst, ststarr[5];
+    b = stst.sta;
+    ststarr[1].stb[2] = 5;
     d = read();
+    c = e[2];
+    e[9] = 5;
     while (a > 0){
         if(!(a==1)){
             b = 10;

@@ -7,7 +7,7 @@ int VARnum; //中间代码生成的变量标识
 int TEMPnum;//中间代码生成的临时变量标识
 int LABELnum;//中间代码生成的标签标识
 int SPECIALFUNC;//判断是否是特殊函数的标签
-int TESTFunStage;
+int TESTFunStage; //检测函数判断的阶段
 int FUNCRtTypeINT; //记录函数的返回类型
 
 
@@ -42,6 +42,7 @@ typedef struct VarRec
     int type; //变量的类型 0->not know 1->int 2->float 3->struct 4->func 5->array 
     char* name;//变量的名字 实际上就是 sval
     char* coreName;//变量在中间代码中的名字
+    int address; //用于标注结构体定义列表的项目相对起始地址
     struct VarRec* next;
 } VarRec;
 VarRec* var_head, *var_tail; //注意这个是包含头节点的
@@ -69,7 +70,7 @@ typedef struct Node
     int chCount; //孩子节点的个数
     struct Node* children[10]; //指向孩子的指针
     int subType; //如果是[数组或函数]的ID，记录数组类型或函数返回类型 1->int 2->float 3->struct, [-1]表示是一个右值
-    int parmCnt;//如果是[函数]，记录函数的参数个数
+    int parmCnt;//如果是[函数]，记录函数的参数个数, 如果是[数组]或[结构体]，记录数组的占用空间
     int arrDim;//如果是[数组]，记录数组的维度
     VarRec* parmList;//如果是[函数]，记录函数的参数列表
     VarRec* stdefList;//如果是[结构体]，记录结构体的参数列表
@@ -114,6 +115,7 @@ typedef struct ArrRec
     char* name;
     int dim; //数组的维度
     int type;//数组的类型
+    int size;//数组占用空间的大小
     struct ArrRec* next;
 } ArrRec;
 ArrRec* arr_head, *arr_tail;
@@ -122,6 +124,7 @@ typedef struct StRec
 {
     char* name;
     VarRec* def_list; //结构体定义列表
+    int size; //结构体的总大小
     struct StRec* next;
 } StRec;
 StRec* st_head, *st_tail;
@@ -174,6 +177,8 @@ void popDefCodeListStk();
 void pushPStmtCodeListStk();
 void popPStmtCodeListStk();
 void labelAssign(Node*  tgt, Node* src, int tgtType, int srcType);
+int  setRelAddress(VarRec* stdefList);
+
 
 void _getNewVar(char** out);
 void _getNewTemp(char** out);

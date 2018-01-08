@@ -75,9 +75,11 @@ Specifier: TYPE             {$$ = own1Child("Specifier", $1);
 ;
 StructSpecifier: STRUCT OptTag LC DefList RC  {//这个是结构体在定义
                                                 $$ = own5Child("StructSpecifier", $1, $2, $3, $4, $5);
+                                                int size = setRelAddress(STDefList);
                                                STDclList = STDefList;//给出当前的声明结构体参数表
                                                 if($2->chCount!=0){
                                                     ($2->children[0])->stdefList=STDefList;//设置结构体定义
+                                                    ($2->children[0])->parmCnt = size;
                                                     //outPutLinks(STDefList);
                                                     if(addVarRec($2->children[0]) == 0){
                                                         myerror(16, "结构体的名字与前面定义过的结构体或变量的名字重复。");
@@ -373,8 +375,7 @@ VarDec_x:              {$$ = own0Child("VarDec_x");
 Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         if($1->type != $3->type){
                             myerror(5, "赋值号两边的表达式类型不匹配。");
-                            
-                        }else if($1->subType == -1){
+                        }else if($1->subType != -1){
                             myerror(6, "赋值号左边出现一个只有右值的表达式。");
                         }else if($1->type == 5 && ($1->subType != $3->subType || $1->arrDim != $3->arrDim)){
                             myerror(6, "赋值号两边的表达式类型不匹配。数组需要类型和维度都相同");
@@ -512,6 +513,7 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                 }
 | ID LP RP       {  //codeOK
                     $$ = own3Child("Exp", $1, $2, $3);
+                    
                     if(!strcmp("read", $1->sval)){
                         char* t;
                         _getNewTemp(&t);
@@ -527,12 +529,19 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                 }
 | Exp LB Exp RB  {  //codeOK
                     $$ = own4Child("Exp", $1, $2, $3, $4);
+                    $$->subType = -1; //表示这是一个左值
                     if($1->type != 5){
                         myerror(10, "对非数组型变量使用“[…]”（数组访问）操作符。");
                     }else if($3->type != 1){
                         myerror(12, "数组访问操作符“[…]”中出现非整数");
                     }else if($1->arrDim == 1){
                         $$->type = $1->subType;
+                        int size = 4;
+                        if($$->type == 3){
+                            StRec * rec = checkStRec($1);
+                            $$->stdefList = rec->def_list;
+                            size = rec->size;
+                        }
                         //因为要求中说只考虑一维数组，所以这里不考虑高维数组的情况
                         char* t1, *t2, *t3;
                         _getNewTemp(&t1);
@@ -541,7 +550,7 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         char* s1 = (char*)malloc(sizeof(char)*100);     
                         char* s2 = (char*)malloc(sizeof(char)*100);     
                         char* s3 = (char*)malloc(sizeof(char)*100);     
-                        sprintf(s1, "%s := %s * 4\n", t1, $3->coreName);
+                        sprintf(s1, "%s := %s * #%d\n", t1, $3->coreName, size);
                         sprintf(s2, "%s := %s + %s\n", t2, $1->coreName, t1);
                         sprintf(s3, "%s := *%s\n", t3, t2);
                         // printf("%s := %s * 4\n", t1, $3->coreName);
@@ -557,7 +566,9 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                         $$->subType = $1->subType;
                     }
                     }
-| Exp DOT ID   {$$ = own3Child("Exp", $1, $2, $3);
+| Exp DOT ID   {
+                $$ = own3Child("Exp", $1, $2, $3);
+                $$->subType = -1; //表示这是一个左值
                 if($1->type != 3){
                     myerror(13, "对非结构体型变量使用“.”操作符。");
                 }else{
@@ -567,6 +578,25 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     while(p){
                         if(!strcmp(p->name, $3->sval)){
                             $$->type = p->type;
+                            if(p->type == 5){
+                                Node* tempN = (Node*)malloc(sizeof(Node));
+                                tempN->sval = p->name;
+                                ArrRec* rec = checkArrRec(tempN);
+                                $$->subType = rec->type;
+                                $$->arrDim = rec->dim;
+                            }
+                            int addr = p->address;
+                            char* t1, *t2;
+                            _getNewTemp(&t1);
+                            _getNewTemp(&t2);
+                            char* s1 = (char*)malloc(sizeof(char)*100);     
+                            char* s2 = (char*)malloc(sizeof(char)*100);
+                            sprintf(s1, "%s := %s + #%d\n", t2, $1->coreName, addr);
+                            sprintf(s2, "%s := *%s\n", t1, t2);
+                            $$->coreName = t1;
+                            $$->subCoreName = t2;
+                            copyCode($$, $1);
+                            combineCode($$, 2, getCodeblock(1, s1), getCodeblock(1, s2));
                             flag = 1;
                             break;
                         }
@@ -577,7 +607,9 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                     }
                 }
                 }
-| ID    {$$ = own1Child("Exp", $1); 
+| ID    {
+        $$ = own1Child("Exp", $1); 
+        $$->subType = -1; //表示这是一个左值
         VarRec* rcd = checkVarRec($1);
         if(rcd == NULL){
             myerror(1, "变量在使用时未经定义");
@@ -591,18 +623,19 @@ Exp: Exp ASSIGNOP Exp    {$$ = own3Child("Exp", $1, $2, $3);
                 ArrRec* arrrcd = checkArrRec($1);
                 $$-> subType= arrrcd->type;
                 $$-> arrDim= arrrcd->dim;
+                $$->sval = $1->sval;
             }
         }
         
         }
-| INT   {$$ = own1Child("Exp", $1); $$->type = 1; $$->subType = -1;
+| INT   {$$ = own1Child("Exp", $1); $$->type = 1;
         $$->coreName = _insNumFmt($1->sval);
         // char* t;
         // _getNewTemp(&t);
         // _AEqualB_(t, _insNumFmt($1->sval));
         // $$->coreName = t;
 }
-| FLOAT {$$ = own1Child("Exp", $1); $$->type = 2; $$->subType = -1;
+| FLOAT {$$ = own1Child("Exp", $1); $$->type = 2;
         $$->coreName = _insNumFmt($1->sval);
         // char* t;
         // _getNewTemp(&t);

@@ -5,6 +5,74 @@
 #include <stdarg.h>
 #include "funcs.h"
 
+int getVarRecSize(VarRec * p){
+    int lastLength = 0;
+    Node* tempN = (Node*)malloc(sizeof(Node));
+    switch (p->type){
+        case 0:
+            printf("声明类型为0,错误\n");
+            break;
+        case 1:
+            lastLength = 4;
+            break;
+        case 2:
+            lastLength = 4;
+            break;
+        case 3:
+            tempN->sval = p->name;
+            StRec* st_rec = checkStRec(tempN); 
+            if(st_rec == NULL){
+                printf("找不到结构体\n");
+            }else{
+                lastLength = st_rec->size;
+            }
+            break;
+        case 5:
+            tempN->sval = p->name;
+            ArrRec* arr_rec = checkArrRec(tempN);
+            if(arr_rec ==NULL){
+                printf("找不到数组\n");
+            }else{
+                lastLength = arr_rec->size;
+            }
+            break;
+        default:
+            break;
+    }
+    return lastLength;
+}
+
+//注意这里不支持结构体的自嵌套, 返回的是结构体的总长度。
+int  setRelAddress(VarRec* stdefList){
+    VarRec* p = stdefList;
+    int lastLength = 0;
+    int lastAddr = 0;
+    int size = 0;
+    //Node* tempN = (Node*)malloc(sizeof(Node));
+    while (p){
+        p->address = lastAddr + lastLength;
+        lastAddr = p->address;
+        lastLength = getVarRecSize(p);
+        p = p->next;
+    }
+    size = lastAddr + lastLength;
+    return size;
+}
+
+int checkStLength(VarRec* stdDclList){
+    int length = 0;
+    int lastaddr = 0;
+    if(stdDclList != NULL){
+        VarRec* p = stdDclList;
+        while (p->next){
+            p = p->next;
+        }
+        lastaddr = p->address;
+        length = lastaddr +  getVarRecSize(p);
+    }
+    return length;
+}
+
 //将lbaddr添加到tgt的type标签的引用表里边
 void addToCiteTable(Node* tgt, char** lbaddr, int type){
     if(type > 2 || type < 0){
@@ -21,9 +89,11 @@ void labelAssign(Node*  tgt, Node* src, int tgtType, int srcType){
         printf("\n类型错误\n");
         return;
     }
-
+    //添加tgt到src的引用。
     addToCiteTable(src, tgt->labelsAddr[tgtType], srcType);
+    //将src的值付给tgt。
     *(tgt->labelsAddr[tgtType]) = *(src->labelsAddr[srcType]);
+    //将src的值付给tgt的引用列表中的所有值，并且将那些引用添加到src的引用列表中
     int citeCount = tgt->citeTableTop[tgtType];
     for( int i = 0; i < citeCount; i++){
         *(tgt->citeTable[tgtType][i]) = *(src->labelsAddr[srcType]);
@@ -337,29 +407,64 @@ void _arrDefOperation_(Node* ss, Node* s1, Node*s2){
     if(s1->type == 3 && s2->type != 5){
         s1->stdefList = STDclList;
         addStRec(s1);
+        //让VarDec包含ID的类型和值
+        ss->type = s1->type;
+        ss->sval = s1->sval;
+        if(addVarRec(s1) == 0){
+            if(ISDefSt){
+                myerror(5, "结构体中域名重复定义");
+            }else{
+                myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+            }
+        }
+        int size = checkStLength(STDclList);
+        char* s = (char*)malloc(sizeof(char)*100);
+        //printf("DEC %s %d\n", s1->coreName, s2->subType*4);
+        sprintf(s, "DEC %s %d\n", s1->coreName, size);
+        addCode(ss, getCodeblock(1, s));
     }
     //如果是数组的话则改变ID的类型，否则不变。
-    if(s2->type == 5){
+    else if(s2->type == 5){
         s1->subType = s1->type;
         s1->type = 5;
         s1->arrDim = s2->arrDim;
-        addArrRec(s1);
-    }
-    //让VarDec包含ID的类型和值
-    ss->type = s1->type;
-    ss->sval = s1->sval;
-    if(addVarRec(s1) == 0){
-        if(ISDefSt){
-            myerror(5, "结构体中域名重复定义");
-        }else{
-            myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+        int size = s2->subType*4;
+        s1->parmCnt = size;
+        //如果是结构体数组的话
+        if(s1->subType == 3){
+            s1->stdefList = STDclList;
+            s1->parmCnt = checkStLength(STDclList);
+            addStRec(s1);
+            size = s2->subType * checkStLength(STDclList);
+            s1->parmCnt = size;
         }
-    }
-    if(s1->type == 5){
+        addArrRec(s1);
+        //让VarDec包含ID的类型和值
+        ss->type = s1->type;
+        ss->sval = s1->sval;
+        if(addVarRec(s1) == 0){
+            if(ISDefSt){
+                myerror(5, "结构体中域名重复定义");
+            }else{
+                myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+            }
+        }
         char* s = (char*)malloc(sizeof(char)*100);
         //printf("DEC %s %d\n", s1->coreName, s2->subType*4);
-        sprintf(s, "DEC %s %d\n", s1->coreName, s2->subType*4);
+        sprintf(s, "DEC %s %d\n", s1->coreName, size);
         addCode(ss, getCodeblock(1, s));
+        
+    }else{
+        //让VarDec包含ID的类型和值
+        ss->type = s1->type;
+        ss->sval = s1->sval;
+        if(addVarRec(s1) == 0){
+            if(ISDefSt){
+                myerror(5, "结构体中域名重复定义");
+            }else{
+                myerror(3, "变量出现重复定义，或变量与前面定义过的结构体名字重复。");
+            }
+        }
     }
     ss->coreName = _checkCoreName(s1->sval);
 }
@@ -393,8 +498,18 @@ void addToParmList(VarRec* node){
 void addToSTDefList(VarRec* node){
     //debug();
     //printf("-");
-    node->next = STDefList;
-    STDefList = node;
+    // node->next = STDefList;
+    // STDefList = node;
+    node->next = NULL;
+    if(STDefList == NULL){
+        STDefList = node;
+    }else{
+        VarRec*p = STDefList;
+        while (p->next){
+            p = p->next;
+        }
+        p->next = node;
+    }
 }
 
 void outPutLinks(VarRec* link){
@@ -561,6 +676,7 @@ void addArrRec(Node* ID){
         newNode->type = ID->subType;
         newNode->next = NULL;
         newNode->dim = ID->arrDim;
+        newNode->size = ID->parmCnt;
         arr_tail->next = newNode;
         arr_tail = arr_tail->next;
         return;
@@ -600,6 +716,7 @@ void addStRec(Node* ID){
         newNode->name = ID->sval;
         newNode->def_list = ID->stdefList;
         newNode->next = NULL;
+        newNode->size = ID->parmCnt;
         st_tail->next = newNode;
         st_tail = st_tail->next;
         return;
